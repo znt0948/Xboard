@@ -10,20 +10,15 @@ if ! command -v git &> /dev/null; then
     exit 1
 fi
 
-# 确保安全目录
 git config --global --add safe.directory $(pwd)
-
-# 强制覆盖本地 master
-git fetch origin
-git reset --hard origin/master
-git clean -fdx
-
-# XBoard 系统更新
+git fetch --all && git reset --hard origin/master && git pull origin master
+rm -rf composer.lock composer.phar
+wget https://github.com/composer/composer/releases/latest/download/composer.phar -O composer.phar
+php composer.phar update -vvv
 php artisan xboard:update
 
-# 权限修复
 if [ -f "/etc/init.d/bt" ] || [ -f "/.dockerenv" ]; then
-  chown -R www:www $(pwd)
+  chown -R www:www $(pwd);
 fi
 
 if [ -d ".docker/.data" ]; then
