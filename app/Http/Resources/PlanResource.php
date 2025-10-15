@@ -19,26 +19,28 @@ class PlanResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return [
-            'id' => $this->resource['id'],
-            'group_id' => $this->resource['group_id'],
-            'name' => $this->resource['name'],
-            'tags' => $this->resource['tags'],
-            'content' => $this->formatContent(),
-            ...$this->getPeriodPrices(),
-            'capacity_limit' => $this->getFormattedCapacityLimit(),
-            'remaining_capacity' => PlanService::getRemainingCapacity($this->resource),
-            'transfer_enable' => $this->resource['transfer_enable'],
-            'speed_limit' => $this->resource['speed_limit'],
-            'device_limit' => $this->resource['device_limit'],
-            'show' => (bool) $this->resource['show'],
-            'sell' => (bool) $this->resource['sell'],
-            'renew' => (bool) $this->resource['renew'],
-            'reset_traffic_method' => $this->resource['reset_traffic_method'],
-            'sort' => $this->resource['sort'],
-            'created_at' => $this->resource['created_at'],
-            'updated_at' => $this->resource['updated_at']
-        ];
+    $planService = new PlanService();
+
+    return [
+        'id' => $this->resource['id'],
+        'group_id' => $this->resource['group_id'],
+        'name' => $this->resource['name'],
+        'tags' => $this->resource['tags'],
+        'content' => $this->formatContent(),
+        ...$this->getPeriodPrices(),
+        'capacity_limit' => $this->getFormattedCapacityLimit(),
+        'remaining_capacity' => $planService->getRemainingCapacity($this->resource),
+        'transfer_enable' => $this->resource['transfer_enable'],
+        'speed_limit' => $this->resource['speed_limit'],
+        'device_limit' => $this->resource['device_limit'],
+        'show' => (bool) $this->resource['show'],
+        'sell' => (bool) $this->resource['sell'],
+        'renew' => (bool) $this->resource['renew'],
+        'reset_traffic_method' => $this->resource['reset_traffic_method'],
+        'sort' => $this->resource['sort'],
+        'created_at' => $this->resource['created_at'],
+        'updated_at' => $this->resource['updated_at']
+    ];
     }
 
     /**
