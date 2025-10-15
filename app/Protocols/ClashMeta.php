@@ -59,103 +59,98 @@ class ClashMeta extends AbstractProtocol
         ],
     ];
 
-    public function handle()
-    {
-        $servers = $this->servers;
-        $user = $this->user;
-        $appName = admin_setting('app_name', 'XBoard');
+   public function handle()
+{
+    $servers = $this->servers;
+    $user = $this->user;
+    $appName = admin_setting('app_name', 'XBoard');
 
-        $template = admin_setting('subscribe_template_clashmeta', File::exists(base_path(self::CUSTOM_TEMPLATE_FILE))
-            ? File::get(base_path(self::CUSTOM_TEMPLATE_FILE))
-            : (
-                File::exists(base_path(self::CUSTOM_CLASH_TEMPLATE_FILE))
-                ? File::get(base_path(self::CUSTOM_CLASH_TEMPLATE_FILE))
-                : File::get(base_path(self::DEFAULT_TEMPLATE_FILE))
-            ));
+    $template = admin_setting('subscribe_template_clashmeta', File::exists(base_path(self::CUSTOM_TEMPLATE_FILE))
+        ? File::get(base_path(self::CUSTOM_TEMPLATE_FILE))
+        : (
+            File::exists(base_path(self::CUSTOM_CLASH_TEMPLATE_FILE))
+            ? File::get(base_path(self::CUSTOM_CLASH_TEMPLATE_FILE))
+            : File::get(base_path(self::DEFAULT_TEMPLATE_FILE))
+        ));
 
-        $config = Yaml::parse($template);
-        $proxy = [];
-        $proxies = [];
+    $config = Yaml::parse($template);
+    $proxy = [];
+    $proxies = [];
 
-        foreach ($servers as $item) {
-            if ($item['type'] === Server::TYPE_SHADOWSOCKS) {
-                array_push($proxy, self::buildShadowsocks($item['password'], $item));
-                array_push($proxies, $item['name']);
-            }
-            if ($item['type'] === Server::TYPE_VMESS) {
-                array_push($proxy, self::buildVmess($item['password'], $item));
-                array_push($proxies, $item['name']);
-            }
-            if ($item['type'] === Server::TYPE_TROJAN) {
-                array_push($proxy, self::buildTrojan($item['password'], $item));
-                array_push($proxies, $item['name']);
-            }
-            if ($item['type'] === Server::TYPE_VLESS) {
-                array_push($proxy, self::buildVless($item['password'], $item));
-                array_push($proxies, $item['name']);
-            }
+    // 1. 构建所有 proxy 节点
+    foreach ($servers as $item) {
+        $method = 'build' . ucfirst($item['type']);
+        if (method_exists($this, $method)) {
             if ($item['type'] === Server::TYPE_HYSTERIA) {
-                array_push($proxy, self::buildHysteria($item['password'], $item, $user));
-                array_push($proxies, $item['name']);
+                $proxy[] = $this->$method($item['password'], $item, $user);
+            } else {
+                $proxy[] = $this->$method($item['password'], $item);
             }
-            if ($item['type'] === Server::TYPE_TUIC) {
-                array_push($proxy, self::buildTuic($item['password'], $item));
-                array_push($proxies, $item['name']);
-            }
-            if ($item['type'] === Server::TYPE_ANYTLS) {
-                array_push($proxy, self::buildAnyTLS($item['password'], $item));
-                array_push($proxies, $item['name']);
-            }
-            if ($item['type'] === Server::TYPE_SOCKS) {
-                array_push($proxy, self::buildSocks5($item['password'], $item));
-                array_push($proxies, $item['name']);
-            }
-            if ($item['type'] === Server::TYPE_HTTP) {
-                array_push($proxy, self::buildHttp($item['password'], $item));
-                array_push($proxies, $item['name']);
-            }
-            if ($item['type'] === Server::TYPE_MIERU) {
-                array_push($proxy, self::buildMieru($item['password'], $item));
-                array_push($proxies, $item['name']);
+            $proxies[] = $item['name'];
+        }
+    }
+
+    // 2. 写入 proxies
+    $config['proxies'] = array_merge($config['proxies'] ?? [], $proxy);
+
+    // 3. 更新 proxy-groups
+    foreach ($config['proxy-groups'] as $k => $v) {
+        if (!is_array($v['proxies'])) {
+            $config['proxy-groups'][$k]['proxies'] = [];
+        }
+
+        $groupProxies = $config['proxy-groups'][$k]['proxies'];
+        $hasRegex = false;
+
+        // 检查是否有正则节点
+        foreach ($groupProxies as $src) {
+            if ($this->isRegex($src)) {
+                $hasRegex = true;
+                break;
             }
         }
 
-        $config['proxies'] = array_merge($config['proxies'] ? $config['proxies'] : [], $proxy);
-        foreach ($config['proxy-groups'] as $k => $v) {
-            if (!is_array($config['proxy-groups'][$k]['proxies']))
-                $config['proxy-groups'][$k]['proxies'] = [];
-            $isFilter = false;
-            foreach ($config['proxy-groups'][$k]['proxies'] as $src) {
+        // 如果有正则节点，按正则替换匹配的节点
+        if ($hasRegex) {
+            $newProxies = [];
+            foreach ($groupProxies as $src) {
+                if (!$this->isRegex($src)) {
+                    $newProxies[] = $src;
+                    continue;
+                }
                 foreach ($proxies as $dst) {
-                    if (!$this->isRegex($src))
-                        continue;
-                    $isFilter = true;
-                    $config['proxy-groups'][$k]['proxies'] = array_values(array_diff($config['proxy-groups'][$k]['proxies'], [$src]));
                     if ($this->isMatch($src, $dst)) {
-                        array_push($config['proxy-groups'][$k]['proxies'], $dst);
+                        $newProxies[] = $dst;
                     }
                 }
-                if ($isFilter)
-                    continue;
             }
-            if ($isFilter)
-                continue;
-            $config['proxy-groups'][$k]['proxies'] = array_merge($config['proxy-groups'][$k]['proxies'], $proxies);
+            $config['proxy-groups'][$k]['proxies'] = array_values(array_unique($newProxies));
         }
-        $config['proxy-groups'] = array_filter($config['proxy-groups'], function ($group) {
-            return $group['proxies'];
-        });
-        $config['proxy-groups'] = array_values($config['proxy-groups']);
-        $config = $this->buildRules($config);
 
-        $yaml = Yaml::dump($config, 2, 4, Yaml::DUMP_EMPTY_ARRAY_AS_SEQUENCE);
-        $yaml = str_replace('$app_name', admin_setting('app_name', 'XBoard'), $yaml);
-        return response($yaml)
-            ->header('content-type', 'text/yaml')
-            ->header('subscription-userinfo', "upload={$user['u']}; download={$user['d']}; total={$user['transfer_enable']}; expire={$user['expired_at']}")
-            ->header('profile-update-interval', '24')
-            ->header('content-disposition', 'attachment;filename*=UTF-8\'\'' . rawurlencode($appName));
+        // 如果 group 为空且没有正则，才填充全部节点
+        if (empty($config['proxy-groups'][$k]['proxies'])) {
+            $config['proxy-groups'][$k]['proxies'] = $proxies;
+        }
     }
+
+    // 4. 清理空 proxy-groups
+    $config['proxy-groups'] = array_values(array_filter($config['proxy-groups'], function ($group) {
+        return !empty($group['proxies']);
+    }));
+
+    // 5. 构建规则
+    $config = $this->buildRules($config);
+
+    // 6. 生成 YAML 并返回
+    $yaml = Yaml::dump($config, 2, 4, Yaml::DUMP_EMPTY_ARRAY_AS_SEQUENCE);
+    $yaml = str_replace('$app_name', $appName, $yaml);
+
+    return response($yaml)
+        ->header('content-type', 'text/yaml')
+        ->header('subscription-userinfo', "upload={$user['u']}; download={$user['d']}; total={$user['transfer_enable']}; expire={$user['expired_at']}")
+        ->header('profile-update-interval', '24')
+        ->header('content-disposition', 'attachment;filename*=UTF-8\'\'' . rawurlencode($appName));
+}
 
     /**
      * Build the rules for Clash.

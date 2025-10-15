@@ -60,9 +60,21 @@ class UserController extends Controller
             return;
         }
 
-        collect($request->input('filter'))->each(function ($filter) use ($builder) {
-            $field = $filter['id'];
-            $value = $filter['value'];
+        $filters = $request->input('filter', []);
+
+        // 如果是字符串 JSON，则解码
+        if (is_string($filters)) {
+            $filters = json_decode($filters, true) ?: [];
+        }
+
+        collect($filters)->each(function ($filter) use ($builder) {
+            if (!is_array($filter)) {
+                return; // 跳过非数组项
+            }
+            $field = $filter['id'] ?? null;
+            $value = $filter['value'] ?? null;
+
+            if (!$field) return;
 
             $builder->where(function ($query) use ($field, $value) {
                 $this->buildFilterQuery($query, $field, $value);
@@ -139,10 +151,22 @@ class UserController extends Controller
             return;
         }
 
-        collect($request->input('sort'))->each(function ($sort) use ($builder) {
-            $field = $sort['id'];
-            $direction = $sort['desc'] ? 'DESC' : 'ASC';
-            $builder->orderBy($field, $direction);
+        $sorts = $request->input('sort', []);
+
+        // 如果是字符串 JSON，则解码
+        if (is_string($sorts)) {
+            $sorts = json_decode($sorts, true) ?: [];
+        }
+
+        collect($sorts)->each(function ($sort) use ($builder) {
+            if (!is_array($sort)) {
+                return;
+            }
+            $field = $sort['id'] ?? null;
+            $direction = isset($sort['desc']) && $sort['desc'] ? 'DESC' : 'ASC';
+            if ($field) {
+                $builder->orderBy($field, $direction);
+            }
         });
     }
 

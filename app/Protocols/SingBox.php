@@ -90,63 +90,127 @@ class SingBox extends AbstractProtocol
         return is_array($jsonData) ? $jsonData : json_decode($jsonData, true);
     }
 
-    protected function buildOutbounds()
-    {
-        $outbounds = $this->config['outbounds'];
-        $proxies = [];
-        foreach ($this->servers as $item) {
-            $protocol_settings = $item['protocol_settings'];
-            if ($item['type'] === Server::TYPE_SHADOWSOCKS) {
-                $ssConfig = $this->buildShadowsocks($item['password'], $item);
-                $proxies[] = $ssConfig;
-            }
-            if ($item['type'] === Server::TYPE_TROJAN) {
-                $trojanConfig = $this->buildTrojan($this->user['uuid'], $item);
-                $proxies[] = $trojanConfig;
-            }
-            if ($item['type'] === Server::TYPE_VMESS) {
-                $vmessConfig = $this->buildVmess($this->user['uuid'], $item);
-                $proxies[] = $vmessConfig;
-            }
-            if (
-                $item['type'] === Server::TYPE_VLESS
-                && in_array(data_get($protocol_settings, 'network'), ['tcp', 'ws', 'grpc', 'http', 'quic', 'httpupgrade'])
-            ) {
-                $vlessConfig = $this->buildVless($this->user['uuid'], $item);
-                $proxies[] = $vlessConfig;
-            }
-            if ($item['type'] === Server::TYPE_HYSTERIA) {
-                $hysteriaConfig = $this->buildHysteria($this->user['uuid'], $item);
-                $proxies[] = $hysteriaConfig;
-            }
-            if ($item['type'] === Server::TYPE_TUIC) {
-                $tuicConfig = $this->buildTuic($this->user['uuid'], $item);
-                $proxies[] = $tuicConfig;
-            }
-            if ($item['type'] === Server::TYPE_ANYTLS) {
-                $anytlsConfig = $this->buildAnyTLS($this->user['uuid'], $item);
-                $proxies[] = $anytlsConfig;
-            }
-            if ($item['type'] === Server::TYPE_SOCKS) {
-                $socksConfig = $this->buildSocks($this->user['uuid'], $item);
-                $proxies[] = $socksConfig;
-            }
-            if ($item['type'] === Server::TYPE_HTTP) {
-                $httpConfig = $this->buildHttp($this->user['uuid'], $item);
-                $proxies[] = $httpConfig;
-            }
-        }
-        foreach ($outbounds as &$outbound) {
-            if (in_array($outbound['type'], ['urltest', 'selector'])) {
-                array_push($outbound['outbounds'], ...array_column($proxies, 'tag'));
-            }
-        }
 
-        $outbounds = array_merge($outbounds, $proxies);
-        $this->config['outbounds'] = $outbounds;
-        return $outbounds;
+protected function buildOutbounds()
+{
+    $outbounds = $this->config['outbounds'];
+    $proxies = [];
+
+    // 1. 构建所有 proxy 节点
+    foreach ($this->servers as $item) {
+        $protocol_settings = $item['protocol_settings'];
+
+        switch ($item['type']) {
+            case Server::TYPE_SHADOWSOCKS:
+                $proxies[] = $this->buildShadowsocks($item['password'], $item);
+                break;
+            case Server::TYPE_TROJAN:
+                $proxies[] = $this->buildTrojan($this->user['uuid'], $item);
+                break;
+            case Server::TYPE_VMESS:
+                $proxies[] = $this->buildVmess($this->user['uuid'], $item);
+                break;
+            case Server::TYPE_VLESS:
+                if (in_array(data_get($protocol_settings, 'network'), ['tcp', 'ws', 'grpc', 'http', 'quic', 'httpupgrade'])) {
+                    $proxies[] = $this->buildVless($this->user['uuid'], $item);
+                }
+                break;
+            case Server::TYPE_HYSTERIA:
+                $proxies[] = $this->buildHysteria($this->user['uuid'], $item);
+                break;
+            case Server::TYPE_TUIC:
+                $proxies[] = $this->buildTuic($this->user['uuid'], $item);
+                break;
+            case Server::TYPE_ANYTLS:
+                $proxies[] = $this->buildAnyTLS($this->user['uuid'], $item);
+                break;
+            case Server::TYPE_SOCKS:
+                $proxies[] = $this->buildSocks($this->user['uuid'], $item);
+                break;
+            case Server::TYPE_HTTP:
+                $proxies[] = $this->buildHttp($this->user['uuid'], $item);
+                break;
+        }
     }
 
+    // 2. 定义筛选规则：null 表示全加入，!开头表示排除
+    $tagFilters = [
+        'VPN (区域伪装)' => ['VPN'],
+        '低倍线路' => ['BUD'],
+        '自动选择' => ['!VPN', '!BUD'], // 示例：排除 VPN 和 BUD
+        '自动选择(<2.0x)' => ['1.0x'],
+        '手动选择' => [null],
+        '电信优化' => ['BGP', 'TEL'],
+        '联通优化' => ['BGP', 'UNI'],
+        '移动优化' => ['BGP', 'MOB']
+    ];
+
+    // 3. 给 selector/urltest 类型 outbound 添加 proxy
+    foreach ($outbounds as &$outbound) {
+        if (!isset($outbound['type'], $outbound['tag'], $outbound['outbounds']) || !is_array($outbound['outbounds'])) {
+            continue;
+        }
+
+        if (!in_array($outbound['type'], ['urltest', 'selector'])) {
+            continue;
+        }
+
+        $tag = $outbound['tag'];
+        if (!isset($tagFilters[$tag])) {
+            continue;
+        }
+
+        $filterRules = $tagFilters[$tag];
+        $matchedTags = [];
+
+        // 3a. null → 全部加入
+        if (is_null($filterRules)) {
+            $matchedTags = array_column($proxies, 'tag');
+        } else {
+            // 3b. 按关键词包含/排除
+            foreach ($proxies as $proxy) {
+                $include = true; 
+                $hasIncludeRule = false;
+
+                foreach ($filterRules as $keyword) {
+                    if (str_starts_with($keyword, '!')) {
+                        // 排除规则
+                        $kw = substr($keyword, 1);
+                        if (stripos($proxy['tag'], $kw) !== false) {
+                            $include = false; 
+                            break; // 命中排除 → 不加
+                        }
+                    } else {
+                        // 包含规则
+                        $hasIncludeRule = true;
+                        if (stripos($proxy['tag'], $keyword) !== false) {
+                            $include = true; // 命中包含 → 加
+                            break;
+                        } else {
+                            $include = false; // 没命中当前包含
+                        }
+                    }
+                }
+
+                // 如果有正向规则但都没命中 → 不加
+                if ($hasIncludeRule && !$include) {
+                    continue;
+                }
+
+                if ($include) {
+                    $matchedTags[] = $proxy['tag'];
+                }
+            }
+        }
+
+        $outbound['outbounds'] = array_values(array_unique(array_merge($outbound['outbounds'], $matchedTags)));
+    }
+    unset($outbound);
+
+    // 4. 合并 proxy 节点到最终配置中
+    $this->config['outbounds'] = array_merge($outbounds, $proxies);
+    return $this->config['outbounds'];
+}
     /**
      * Build rule
      */

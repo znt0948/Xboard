@@ -31,4 +31,4 @@ frontend
 docker-compose.yaml
 bun.lockb
 compose.yaml
-.scribe
+.scribe.env
