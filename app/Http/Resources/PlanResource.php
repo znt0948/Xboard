@@ -19,7 +19,7 @@ class PlanResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-    $planService = new PlanService();
+    $planService = new PlanService($this->resource);
 
     return [
         'id' => $this->resource['id'],
