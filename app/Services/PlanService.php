@@ -178,6 +178,23 @@ class PlanService
         return ($plan->capacity_limit - $activeUserCount) > 0;
     }
 
+    //返回 xboard 订阅剩余库存
+        public function getRemainingCapacity(Plan $plan): ?int
+    {
+        if ($plan->capacity_limit === null) {
+            return null; // 无上限
+        }
+
+        $activeUserCount = User::where('plan_id', $plan->id)
+            ->where(function ($query) {
+                $query->where('expired_at', '>=', time())
+                    ->orWhereNull('expired_at');
+            })
+            ->count();
+
+        return max($plan->capacity_limit - $activeUserCount, 0);
+    }
+
     public function getAvailablePeriods(Plan $plan): array
     {
         return array_filter(
