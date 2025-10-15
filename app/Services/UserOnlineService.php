@@ -97,16 +97,15 @@ class UserOnlineService
     }
 
     /**
-     * 计算在线设备数量，过滤掉超过5分钟未活跃的设备
+     * 计算在线设备数量
      */
     public static function calculateDeviceCount(array $ipsArray): int
     {
         $mode = (int) admin_setting('device_limit_mode', 0);
-        $threshold = now()->subMinutes(5)->timestamp;
 
         return match ($mode) {
             1 => collect($ipsArray)
-                ->filter(fn(mixed $data): bool => is_array($data) && isset($data['aliveips']) && isset($data['lastupdateAt']) && $data['lastupdateAt'] >= $threshold)
+                ->filter(fn(mixed $data): bool => is_array($data) && isset($data['aliveips']))
                 ->flatMap(
                     fn(array $data): array => collect($data['aliveips'])
                         ->map(fn(string $ipNodeId): string => Str::before($ipNodeId, '_'))
@@ -116,7 +115,7 @@ class UserOnlineService
                 ->unique()
                 ->count(),
             0 => collect($ipsArray)
-                ->filter(fn(mixed $data): bool => is_array($data) && isset($data['aliveips']) && isset($data['lastupdateAt']) && $data['lastupdateAt'] >= $threshold)
+                ->filter(fn(mixed $data): bool => is_array($data) && isset($data['aliveips']))
                 ->sum(fn(array $data): int => count($data['aliveips'])),
             default => throw new \InvalidArgumentException("Invalid device limit mode: $mode"),
         };
