@@ -121,8 +121,14 @@ class UserController extends Controller
         $user['avatar_url'] = 'https://cdn.v2ex.com/gravatar/' . md5($user->email) . '?s=64&d=identicon';
         $onlineService = app(UserOnlineService::class);
         $user['alive_ip'] = $onlineService->getOnlineCount((int) $authUser->id);
-
-        return $this->success($user);
+        
+        // 添加用户端在线设备显示
+        return $this->success([
+            'user' => $user,
+            'userPlan' => [
+                'aliveIp' => $user['alive_ip']
+            ]
+        ]);
     }
 
 
