@@ -173,10 +173,6 @@ class UserController extends Controller
                 return $this->fail([400, __('Subscription plan does not exist')]);
             }
         }
-        // 获取在线设备数
-        $onlineService = app(\App\Services\UserOnlineService::class);
-        $user['alive_ip'] = $onlineService->getOnlineCount((int) $user->id);
-
         $user['subscribe_url'] = Helper::getSubscribeUrl($user['token']);
         $userService = new UserService();
         $user['reset_day'] = $userService->getResetDay($user);
