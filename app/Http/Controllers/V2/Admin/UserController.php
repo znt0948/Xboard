@@ -20,6 +20,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+use App\Services\UserOnlineService;
+
+
 class UserController extends Controller
 {
     use QueryOperators;
@@ -218,7 +221,16 @@ class UserController extends Controller
         ], [
             'id.required' => '用户ID不能为空'
         ]);
+
         $user = User::find($request->input('id'))->load('invite_user');
+        if (!$user) {
+            return $this->fail([404, '用户不存在']);
+        }
+
+        // 新增：计算在线设备数量
+        $onlineService = app(UserOnlineService::class);
+        $user->alive_ip = $onlineService->getOnlineCount($user->id);
+
         return $this->success($user);
     }
 
