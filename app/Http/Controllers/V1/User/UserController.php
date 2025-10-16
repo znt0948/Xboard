@@ -164,33 +164,22 @@ class UserController extends Controller
                 'next_reset_at'
             ])
             ->first();
-
         if (!$user) {
             return $this->fail([400, __('The user does not exist')]);
         }
-
         if ($user->plan_id) {
             $user['plan'] = Plan::find($user->plan_id);
             if (!$user['plan']) {
                 return $this->fail([400, __('Subscription plan does not exist')]);
             }
         }
-
-        // ✅ 获取在线设备数
-        $onlineService = app(\App\Services\UserOnlineService::class);
-        $aliveIp = $onlineService->getOnlineCount((int) $user->id);
-
-        // ✅ 保持原结构 + 额外字段
         $user['subscribe_url'] = Helper::getSubscribeUrl($user['token']);
         $userService = new UserService();
         $user['reset_day'] = $userService->getResetDay($user);
         $user = HookManager::filter('user.subscribe.response', $user);
-
-        // ✅ 单独追加一个键，不破坏前端结构
-        $user['aliveIp'] = $aliveIp;
-
         return $this->success($user);
     }
+    
     public function resetSecurity(Request $request)
     {
         $user = User::find($request->user()->id);
