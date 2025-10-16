@@ -90,6 +90,7 @@ class UserController extends Controller
     {
         $user = User::where('id', $request->user()->id)
             ->select([
+                'id',
                 'email',
                 'transfer_enable',
                 'last_login_at',
