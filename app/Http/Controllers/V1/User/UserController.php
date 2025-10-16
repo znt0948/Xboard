@@ -19,6 +19,8 @@ use App\Utils\Helper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
+use App\Services\UserOnlineService; // 在文件顶部的 use 列表加入
+
 class UserController extends Controller
 {
     protected $loginService;
@@ -110,6 +112,12 @@ class UserController extends Controller
             return $this->fail([400, __('The user does not exist')]);
         }
         $user['avatar_url'] = 'https://cdn.v2ex.com/gravatar/' . md5($user->email) . '?s=64&d=identicon';
+
+        // 修改 info() 方法，在返回前加入：
+        $onlineService = app(UserOnlineService::class);
+        $alive = $onlineService->getOnlineCount((int) $request->user()->id);
+        $user['alive_ip'] = $alive;   // snake_case，供后端/其他逻辑使用
+        $user['aliveIp'] = $alive;    // camelCase，供前端直接读取
         return $this->success($user);
     }
 
@@ -145,31 +153,26 @@ class UserController extends Controller
                 'next_reset_at'
             ])
             ->first();
-
         if (!$user) {
             return $this->fail([400, __('The user does not exist')]);
         }
-
         if ($user->plan_id) {
             $user['plan'] = Plan::find($user->plan_id);
             if (!$user['plan']) {
                 return $this->fail([400, __('Subscription plan does not exist')]);
             }
         }
-
-        // ✅ 获取在线设备数
-        $onlineService = app(\App\Services\UserOnlineService::class);
-        $aliveIp = $onlineService->getOnlineCount((int) $user->id);
-
-        // ✅ 保持原结构 + 额外字段
         $user['subscribe_url'] = Helper::getSubscribeUrl($user['token']);
         $userService = new UserService();
         $user['reset_day'] = $userService->getResetDay($user);
         $user = HookManager::filter('user.subscribe.response', $user);
 
-        // ✅ 单独追加一个键，不破坏前端结构
-        $user['aliveIp'] = $aliveIp;
 
+        // 修改 getSubscribe() 方法，在返回前也加入：
+        $onlineService = app(\App\Services\UserOnlineService::class);
+        $alive = $onlineService->getOnlineCount((int) $request->user()->id);
+        $user['alive_ip'] = $alive;
+        $user['aliveIp'] = $alive;
         return $this->success($user);
     }
 
