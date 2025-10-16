@@ -88,7 +88,12 @@ class UserController extends Controller
 
     public function info(Request $request)
     {
-        $user = User::where('id', $request->user()->id)
+        $authUser = $request->user();
+        if (!$authUser || !$authUser->id) {
+            return $this->fail([401, __('Unauthorized')]);
+        }
+
+        $user = User::where('id', $authUser->id)
             ->select([
                 'id',
                 'email',
@@ -108,13 +113,18 @@ class UserController extends Controller
                 'uuid'
             ])
             ->first();
+
         if (!$user) {
             return $this->fail([400, __('The user does not exist')]);
         }
+
         $user['avatar_url'] = 'https://cdn.v2ex.com/gravatar/' . md5($user->email) . '?s=64&d=identicon';
-        $user['alive_ip'] = app(UserOnlineService::class)->getOnlineCount($user->id);
+        $onlineService = app(UserOnlineService::class);
+        $user['alive_ip'] = $onlineService->getOnlineCount((int) $authUser->id);
+
         return $this->success($user);
     }
+
 
     public function getStat(Request $request)
     {
