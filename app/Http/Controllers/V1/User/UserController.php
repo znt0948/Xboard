@@ -13,7 +13,6 @@ use App\Models\User;
 use App\Services\Auth\LoginService;
 use App\Services\AuthService;
 use App\Services\Plugin\HookManager;
-use App\Services\UserOnlineService;
 use App\Services\UserService;
 use App\Utils\CacheKey;
 use App\Utils\Helper;
@@ -88,14 +87,8 @@ class UserController extends Controller
 
     public function info(Request $request)
     {
-        $authUser = $request->user();
-        if (!$authUser || !$authUser->id) {
-            return $this->fail([401, __('Unauthorized')]);
-        }
-
-        $user = User::where('id', $authUser->id)
+        $user = User::where('id', $request->user()->id)
             ->select([
-                'id',
                 'email',
                 'transfer_enable',
                 'last_login_at',
@@ -113,24 +106,12 @@ class UserController extends Controller
                 'uuid'
             ])
             ->first();
-
         if (!$user) {
             return $this->fail([400, __('The user does not exist')]);
         }
-
         $user['avatar_url'] = 'https://cdn.v2ex.com/gravatar/' . md5($user->email) . '?s=64&d=identicon';
-        $onlineService = app(UserOnlineService::class);
-        $user['alive_ip'] = $onlineService->getOnlineCount((int) $authUser->id);
-        
-        // 添加用户端在线设备
-        return $this->success([
-            'user' => $user,
-            'userPlan' => [
-                'aliveIp' => $user['alive_ip']
-            ]
-        ]);
+        return $this->success($user);
     }
-
 
     public function getStat(Request $request)
     {
@@ -179,7 +160,7 @@ class UserController extends Controller
         $user = HookManager::filter('user.subscribe.response', $user);
         return $this->success($user);
     }
-    
+
     public function resetSecurity(Request $request)
     {
         $user = User::find($request->user()->id);
