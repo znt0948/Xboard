@@ -8,6 +8,8 @@ use Illuminate\Support\Str;
 
 class UserOnlineService
 {
+    private const EXCLUDED_IPS = ['18.139.222.53', '154.17.22.117'];
+
     /**
      * 缓存相关常量
      */
@@ -17,59 +19,67 @@ class UserOnlineService
      * 获取所有限制设备用户的在线数量
      */
     public function getAliveList(Collection $deviceLimitUsers): array
-    {
-        if ($deviceLimitUsers->isEmpty()) {
-            return [];
-        }
-
-        $cacheKeys = $deviceLimitUsers->pluck('id')
-            ->map(fn(int $id): string => self::CACHE_PREFIX . $id)
-            ->all();
-
-        return collect(cache()->many($cacheKeys))
-            ->filter()
-            ->map(fn(array $data): ?int => $data['alive_ip'] ?? null)
-            ->filter()
-            ->mapWithKeys(fn(int $count, string $key): array => [
-                (int) Str::after($key, self::CACHE_PREFIX) => $count
-            ])
-            ->all();
+{
+    if ($deviceLimitUsers->isEmpty()) {
+        return [];
     }
 
-    /**
-     * 获取指定用户的在线设备信息
-     */
-    public static function getUserDevices(int $userId): array
-    {
-        $data = cache()->get(self::CACHE_PREFIX . $userId, []);
-        if (empty($data)) {
-            return ['total_count' => 0, 'devices' => []];
-        }
+    $cacheKeys = $deviceLimitUsers->pluck('id')
+        ->map(fn(int $id): string => self::CACHE_PREFIX . $id)
+        ->all();
 
-        $devices = collect($data)
-            ->filter(fn(mixed $item): bool => is_array($item) && isset($item['aliveips']))
-            ->flatMap(function (array $nodeData, string $nodeKey): array {
-                return collect($nodeData['aliveips'])
-                    ->mapWithKeys(function (string $ipNodeId) use ($nodeData, $nodeKey): array {
-                        $ip = Str::before($ipNodeId, '_');
-                        return [
-                            $ip => [
-                                'ip' => $ip,
-                                'last_seen' => $nodeData['lastupdateAt'],
-                                'node_type' => Str::before($nodeKey, (string) $nodeData['lastupdateAt'])
-                            ]
-                        ];
-                    })
-                    ->all();
-            })
-            ->values()
-            ->all();
+    $cached = collect(cache()->many($cacheKeys))
+        ->filter(); // remove nulls
 
-        return [
-            'total_count' => $data['alive_ip'] ?? 0,
-            'devices' => $devices
-        ];
+    // 每个缓存项是一个数组（按节点分组），我们使用 calculateDeviceCount 计算排除 EXCLUDED_IPS 后的设备数
+    return $cached
+        ->map(fn(array $data): int => self::calculateDeviceCount($data))
+        ->filter(fn(int $count): bool => $count > 0)
+        ->mapWithKeys(fn(int $count, string $key): array => [
+            (int) Str::after($key, self::CACHE_PREFIX) => $count
+        ])
+        ->all();
+}
+
+/**
+ * 获取指定用户的在线设备信息
+ */
+public static function getUserDevices(int $userId): array
+{
+    $data = cache()->get(self::CACHE_PREFIX . $userId, []);
+    if (empty($data)) {
+        return ['total_count' => 0, 'devices' => []];
     }
+
+    // 逐节点收集设备信息，排除 EXCLUDED_IPS 中的真实 IP（去掉 node suffix）
+    $devices = collect($data)
+        ->filter(fn(mixed $item): bool => is_array($item) && isset($item['aliveips']))
+        ->flatMap(function (array $nodeData, string $nodeKey): array {
+            return collect($nodeData['aliveips'])
+                ->reject(fn(string $ipNodeId): bool => in_array(\Illuminate\Support\Str::before($ipNodeId, '_'), self::EXCLUDED_IPS))
+                ->mapWithKeys(function (string $ipNodeId) use ($nodeData, $nodeKey): array {
+                    $ip = \Illuminate\Support\Str::before($ipNodeId, '_');
+                    return [
+                        $ip => [
+                            'ip' => $ip,
+                            'last_seen' => $nodeData['lastupdateAt'] ?? null,
+                            'node_type' => Str::before($nodeKey, (string) ($nodeData['lastupdateAt'] ?? ''))
+                        ]
+                    ];
+                })
+                ->all();
+        })
+        ->values()
+        ->all();
+
+    // 计算排除名单后的总数（与 getOnlineCount 的逻辑一致）
+    $filteredCount = self::calculateDeviceCount($data);
+
+    return [
+        'total_count' => $filteredCount,
+        'devices' => $devices
+    ];
+}
 
 
     /**
@@ -83,7 +93,19 @@ class UserOnlineService
 
         return collect(cache()->many($cacheKeys))
             ->filter()
-            ->map(fn(array $data): int => $data['alive_ip'] ?? 0)
+            ->map(function (array $data): int {
+                if (empty($data)) {
+                    return 0;
+                }
+                $filtered = collect($data)
+                    ->filter(fn($item) => is_array($item) && isset($item['aliveips']))
+                    ->flatMap(fn($node) => $node['aliveips'])
+                    ->reject(fn(string $ipNodeId): bool => in_array(\Illuminate\Support\Str::before($ipNodeId, '_'), self::EXCLUDED_IPS))
+                    ->unique()
+                    ->values()
+                    ->all();
+                return count($filtered);
+            })
             ->all();
     }
 
@@ -93,7 +115,17 @@ class UserOnlineService
     public function getOnlineCount(int $userId): int
     {
         $data = cache()->get(self::CACHE_PREFIX . $userId, []);
-        return $data['alive_ip'] ?? 0;
+        if (empty($data)) {
+            return 0;
+        }
+        $filtered = collect($data)
+            ->filter(fn($item) => is_array($item) && isset($item['aliveips']))
+            ->flatMap(fn($node) => $node['aliveips'])
+            ->reject(fn(string $ipNodeId): bool => in_array(\Illuminate\Support\Str::before($ipNodeId, '_'), self::EXCLUDED_IPS))
+            ->unique()
+            ->values()
+            ->all();
+        return count($filtered);
     }
 
     /**
@@ -108,7 +140,8 @@ class UserOnlineService
                 ->filter(fn(mixed $data): bool => is_array($data) && isset($data['aliveips']))
                 ->flatMap(
                     fn(array $data): array => collect($data['aliveips'])
-                        ->map(fn(string $ipNodeId): string => Str::before($ipNodeId, '_'))
+                        ->map(fn(string $ipNodeId): string => \Illuminate\Support\Str::before($ipNodeId, '_'))
+                        ->reject(fn(string $ip): bool => in_array($ip, self::EXCLUDED_IPS))
                         ->unique()
                         ->all()
                 )
@@ -116,7 +149,11 @@ class UserOnlineService
                 ->count(),
             0 => collect($ipsArray)
                 ->filter(fn(mixed $data): bool => is_array($data) && isset($data['aliveips']))
-                ->sum(fn(array $data): int => count($data['aliveips'])),
+                ->sum(fn(array $data): int =>
+                    collect($data['aliveips'])
+                        ->reject(fn(string $ipNodeId): bool => in_array(\Illuminate\Support\Str::before($ipNodeId, '_'), self::EXCLUDED_IPS))
+                        ->count()
+                ),
             default => throw new \InvalidArgumentException("Invalid device limit mode: $mode"),
         };
     }
