@@ -1173,13 +1173,196 @@
     </div>
   </section>
 
-  <section class="cta">
+<!-- Solutions / Pricing Section -->
+<section class="solutions" id="pricing">
+  <div class="solutions-container">
+  <div class="section-title">
+    <h3>为不同场景量身定制的解决方案</h3>
+    <p>从个人使用到团队协作，总有一个方案适合您</p>
+  </div>
+
+    <div class="plan-grid">
+
+      <div class="plan-card">
+        <h4>基础方案</h4>
+        <p class="plan-desc">轻量使用者首选，快速体验全球网络托管</p>
+        <div class="plan-price">¥3.88<span>/月</span></div>
+        <ul>
+          <li>45GB 全球流量</li>
+          <li>3 台设备同时在线</li>
+          <li>标准接入节点</li>
+          <li>国内中转优化</li>
+        </ul>
+        <a href="/index.php" class="button plan-button">订阅</a>
+      </div>
+
+      <div class="plan-card featured">
+        <h4>专业方案</h4>
+        <p class="plan-desc">高性能用户的理想选择，兼顾速度与安全</p>
+        <div class="plan-price">¥12.88<span>/月</span></div>
+        <ul>
+          <li>150GB 全球流量</li>
+          <li>5 台设备同时在线</li>
+          <li>全球优先节点</li>
+          <li>增强隐私与 DNS 保护</li>
+        </ul>
+        <a href="/index.php" class="button plan-button">订阅</a>
+      </div>
+
+      <div class="plan-card">
+        <h4>企业方案</h4>
+        <p class="plan-desc">为团队与企业打造高可靠、定制化的网络环境</p>
+        <div class="plan-price">¥59.88<span>/月</span></div>
+        <ul>
+          <li>1000GB 全球流量</li>
+          <li>9 台设备同时在线</li>
+          <li>专属优先路由</li>
+          <li>7×24 专属支持</li>
+        </ul>
+        <a href="/index.php" class="button plan-button">订阅</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<style>
+  .solutions {
+    padding: 90px 20px;
+    text-align: center;
+    background: #f8f9fb;
+  }
+
+  .solutions-container {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* 标题统一风格 */
+  .section-header h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 10px;
+  }
+
+  .section-header p {
+    color: #6c757d;
+    font-size: 1.05rem;
+    margin-bottom: 60px;
+  }
+
+  .plan-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 40px;
+  }
+
+  .plan-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+  }
+
+  .plan-card h4 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .plan-desc {
+    color: #6c757d;
+    font-size: 0.95rem;
+    margin-bottom: 26px;
+  }
+
+  .plan-price {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1748cc;
+    margin-bottom: 28px;
+  }
+
+  .plan-price span {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-left: 4px;
+  }
+
+  .plan-card ul {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 32px;
+    color: #333;
+    font-size: 0.95rem;
+  }
+
+  .plan-card ul li {
+    margin-bottom: 10px;
+  }
+
+  .button.plan-button {
+    display: inline-block;
+    padding: 11px 30px;
+    background-color: #1748cc;
+    color: #fff;
+    border-radius: 50px;
+    text-decoration: none;
+    transition: background 0.3s;
+  }
+
+  .button.plan-button:hover {
+    background-color: #123ba5;
+  }
+
+  .featured {
+    transform: scale(1.05);
+  }
+
+
+    /* --- 滚动浮现动画 --- */
+  .plan-card {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    width: 320px;
+    padding: 36px 26px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+
+    /* ✅ 动画部分 */
+    opacity: 0;
+    transform: translateY(30px);
+    animation: slideUp 0.8s ease both;
+    animation-play-state: paused; /* 默认暂停，进入视口后播放 */
+  }
+  /* 关键帧定义（可与 features 共用） */
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @media (max-width: 992px) {
+    .plan-grid {
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+</style>
+
+<section class="cta">
     <div class="cta-container">
       <h3>准备好开始您的探索了吗？</h3>
-      <p>加入我们，世界触手可及</p>
+      <p>加入我们，让世界触手可及</p>
       <a href="javascript:void(0)" onclick="navigateTo('register')" class="button cta-button">现在开始</a>
     </div>
   </section>
+
+
 
   <footer>
     <div class="footer-logo">
@@ -1198,56 +1381,65 @@
   <script>
     // 页面加载完成后淡出加载动画
     window.addEventListener('load', function() {
+  // 先安全处理 preloader：如果页面注释掉或没有 preloader，也不会报错
+  const preloaderEl = document.getElementById('preloader');
+  if (preloaderEl) {
+    setTimeout(function() {
+      preloaderEl.classList.add('fade-out');
+      // 完全移除，避免遮挡页面交互
       setTimeout(function() {
-        document.getElementById('preloader').classList.add('fade-out');
-        // 完全移除，避免遮挡页面交互
-        setTimeout(function() {
-          document.getElementById('preloader').style.display = 'none';
-        }, 800);
-      }, 500);
-      
-      // 设置滚动触发动画
-      setupScrollAnimations();
-    });
+        preloaderEl.style.display = 'none';
+      }, 800);
+    }, 500);
+  }
 
-    // 设置滚动动画
-    function setupScrollAnimations() {
-      // 使用 Intersection Observer API 监测元素是否进入视口
-      const observerOptions = {
-        root: null, // 使用视口作为参考
-        rootMargin: '0px',
-        threshold: 0.1 // 元素有10%进入视口时触发
-      };
-      
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            // 元素进入视口，播放动画
-            if (entry.target.classList.contains('feature-card') || 
-                entry.target.classList.contains('client-card') || 
-                entry.target.classList.contains('cta-container')) {
-              entry.target.style.animationPlayState = 'running';
-            }
-            // 一旦动画触发，不再观察此元素
-            observer.unobserve(entry.target);
-          }
-        });
-      }, observerOptions);
-      
-      // 观察所有需要滚动动画的元素
-      document.querySelectorAll('.feature-card, .client-card, .cta-container').forEach(elem => {
-        observer.observe(elem);
-      });
-      
-      // 设置交错动画延迟
-      document.querySelectorAll('.feature-card').forEach((card, index) => {
-        card.style.animationDelay = `${0.1 * index}s`;
-      });
-      
-      document.querySelectorAll('.client-card').forEach((card, index) => {
-        card.style.animationDelay = `${0.1 * index}s`;
-      });
-    }
+  // 设置滚动触发动画
+  setupScrollAnimations();
+});
+
+// 设置滚动动画
+function setupScrollAnimations() {
+  // 使用 Intersection Observer API 监测元素是否进入视口
+  const observerOptions = {
+    root: null, // 使用视口作为参考
+    rootMargin: '0px',
+    threshold: 0.1 // 元素有10%进入视口时触发
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        // 元素进入视口，播放动画
+        if (entry.target.classList.contains('feature-card') ||
+            entry.target.classList.contains('client-card') ||
+            entry.target.classList.contains('plan-card') ||
+            entry.target.classList.contains('cta-container')) {
+          entry.target.style.animationPlayState = 'running';
+        }
+        // 一旦动画触发，不再观察此元素
+        observer.unobserve(entry.target);
+      }
+    });
+  }, observerOptions);
+
+  // 观察所有需要滚动动画的元素 —— **已把 .plan-card 加入观察列表**
+  document.querySelectorAll('.feature-card, .client-card, .plan-card, .cta-container').forEach(elem => {
+    observer.observe(elem);
+  });
+
+  // 设置交错动画延迟
+  document.querySelectorAll('.feature-card').forEach((card, index) => {
+    card.style.animationDelay = `${0.1 * index}s`;
+  });
+
+  document.querySelectorAll('.client-card').forEach((card, index) => {
+    card.style.animationDelay = `${0.1 * index}s`;
+  });
+
+  document.querySelectorAll('.plan-card').forEach((card, index) => {
+    card.style.animationDelay = `${0.1 * index}s`;
+  });
+}
 
     // 导航函数 - 通过postMessage与父窗口通信
     function navigateTo(route) {
