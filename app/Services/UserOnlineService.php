@@ -8,7 +8,10 @@ use Illuminate\Support\Str;
 
 class UserOnlineService
 {
-    private const EXCLUDED_IPS = ['18.139.222.53', '154.17.22.117'];
+    /**
+     * 不参与统计的IP
+     */
+    private const EXCLUDED_IPS = [];
 
     /**
      * 缓存相关常量
