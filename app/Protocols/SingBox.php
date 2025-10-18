@@ -135,10 +135,10 @@ protected function buildOutbounds()
 
     // 2. 定义筛选规则：null 表示全加入，!开头表示排除
     $tagFilters = [
-        'VPN (区域伪装)' => ['VPN'],
-        '低倍线路' => ['BUD'],
-        '自动选择' => ['!VPN', '!BUD'], // 示例：排除 VPN 和 BUD
-        '自动选择(<2.0x)' => ['1.0x'],
+        'vpn-out' => ['VPN'],
+        'download-out' => ['BUD'],
+        '智能择优' => ['!VPN', '!BUD'], // 示例：排除 VPN 和 BUD
+        '省流模式' => ['1.0x'],
         '手动选择' => [null],
         '电信优化' => ['BGP', 'TEL'],
         '联通优化' => ['BGP', 'UNI'],
