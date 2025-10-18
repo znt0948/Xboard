@@ -1193,7 +1193,7 @@
           <li>标准接入节点</li>
           <li>国内中转优化</li>
         </ul>
-        <a href="/index.php" class="button plan-button">订阅</a>
+        <a href="javascript:void(0)" onclick="navigateTo('shop')" class="button plan-button">订阅</a>
       </div>
 
       <div class="plan-card featured">
@@ -1206,7 +1206,7 @@
           <li>全球优先节点</li>
           <li>增强隐私与 DNS 保护</li>
         </ul>
-        <a href="/index.php" class="button plan-button">订阅</a>
+        <a href="javascript:void(0)" onclick="navigateTo('shop')" class="button plan-button">订阅</a>
       </div>
 
       <div class="plan-card">
@@ -1219,7 +1219,7 @@
           <li>专属优先路由</li>
           <li>7×24 专属支持</li>
         </ul>
-        <a href="/index.php" class="button plan-button">订阅</a>
+        <a href="javascript:void(0)" onclick="navigateTo('shop')" class="button plan-button">订阅</a>
       </div>
 
     </div>
@@ -1227,6 +1227,36 @@
 </section>
 
 <style>
+
+  /* 统一风格的暗色适配 */
+.dark-theme .solutions {
+  background-color: var(--section-bg); /* 与其他 section 背景统一 */
+}
+
+.dark-theme .plan-card {
+  background: var(--card-bg-dark, #1a1a1a); /* 卡片背景与 features 一致 */
+  color: var(--text-primary-dark, #f3f4f6);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.dark-theme .plan-card h4 {
+  color: var(--text-primary-dark, #f9fafb);
+}
+
+.dark-theme .plan-desc,
+.dark-theme .plan-card ul li,
+.dark-theme .plan-price span {
+  color: var(--text-secondary-dark, #d1d5db);
+}
+
+.dark-theme .button.plan-button {
+  background-color: var(--accent-color, #1748cc);
+  color: #fff;
+}
+
+.dark-theme .button.plan-button:hover {
+  background-color: var(--accent-hover, #123ba5);
+}
   .solutions {
     padding: 90px 20px;
     text-align: center;
