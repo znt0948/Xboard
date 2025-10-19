@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
-
+use App\Http\Controllers\V1\User\UserController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
