@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\File;
 |
 */
 
+Route::middleware('auth:sanctum')->get('/user/recent-sessions', [UserController::class, 'getRecentSessions']);
 
 Route::get('/', function (Request $request) {
     if (admin_setting('app_url') && admin_setting('safe_mode_enable', 0)) {
