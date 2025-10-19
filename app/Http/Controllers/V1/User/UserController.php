@@ -20,6 +20,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
 use App\Services\UserOnlineService; // 在文件顶部的 use 列表加入
+use App\Models\UserSession;
 
 class UserController extends Controller
 {
@@ -236,5 +237,27 @@ class UserController extends Controller
 
         $url = $this->loginService->generateQuickLoginUrl($user, $request->input('redirect'));
         return $this->success($url);
+    }
+
+    public function getRecentSessions(Request $request)
+    {
+        $userId = $request->user()->id;
+
+        // 获取最近 10 条登录信息
+        $sessions = UserSession::where('user_id', $userId)
+            ->orderByDesc('login_at')
+            ->limit(10)
+            ->get(['ip_address', 'user_agent', 'login_at']);
+
+        // 格式化返回前端
+        $formatted = $sessions->map(function($s) {
+            return [
+                'ip' => $s->ip_address ?? null,
+                'ua' => $s->user_agent ?? null,
+                'login_at' => $s->login_at?->timestamp ?? null, // 返回时间戳
+            ];
+        });
+
+        return $this->success($formatted);
     }
 }

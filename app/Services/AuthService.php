@@ -28,6 +28,19 @@ class AuthService
         $tokenParts = explode('|', $token->plainTextToken);
         $formattedToken = 'Bearer ' . ($tokenParts[1] ?? $tokenParts[0]);
 
+        // === 新增：记录登录信息 ===
+        try {
+            \App\Models\UserSession::create([
+                'user_id' => $this->user->id,
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->header('User-Agent'),
+                'login_at' => now(),
+                'token_id' => $token->accessToken->id ?? null,
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('Failed to log user session: ' . $e->getMessage());
+        }
+        
         return [
             'token' => $this->user->token,
             'auth_data' => $formattedToken,
