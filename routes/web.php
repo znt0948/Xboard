@@ -95,3 +95,5 @@ Route::get('user/recent-sessions', [\App\Http\Controllers\V1\User\UserController
 Route::prefix('api/v1')->group(function () {
     Route::get('user/recent-sessions', [\App\Http\Controllers\V1\User\UserController::class, 'getRecentSessions']);
 });
+
+Route::middleware('auth:sanctum')->get('/user/online-ips', [UserController::class, 'getOnlineIPs']);

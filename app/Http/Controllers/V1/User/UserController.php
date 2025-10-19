@@ -42,6 +42,14 @@ class UserController extends Controller
         return $this->success($authService->getSessions());
     }
 
+    public function getOnlineIPs(Request $request)
+{
+    $userId = $request->user()->id;
+    $devices = UserOnlineService::getUserDevices($userId);
+
+    return $this->success($devices);
+}
+
     public function removeActiveSession(Request $request)
     {
         $user = User::find($request->user()->id);
