@@ -42,41 +42,33 @@ class UserController extends Controller
         return $this->success($authService->getSessions());
     }
 
-    public function getOnlineIPs(Request $request)
-    {
-        $userId = $request->user()->id;
-        $cacheKey = 'ALIVE_IP_USER_' . $userId;
+public function getOnlineIPs(Request $request)
+{
+    $userId = $request->user()->id;
+    $cacheKey = 'ALIVE_IP_USER_' . $userId;
 
-        $data = cache()->get($cacheKey, []);
-        if (empty($data)) {
-            return $this->success([
-                'total_count' => 0,
-                'devices' => [],
-            ]);
-        }
-
-        $devices = collect($data)
-            ->filter(function ($item) {
-                return is_array($item) && isset($item['aliveips']);
-            })
-            ->flatMap(function ($item) {
-                $ips = $item['aliveips'] ?? [];
-                $time = $item['lastupdateAt'] ?? null;
-                return collect($ips)->map(function ($ip) use ($time) {
-                    return [
-                        'ip' => $ip,
-                        'last_seen' => $time,
-                    ];
-                });
-            })
-            ->unique('ip')
-            ->values();
-
+    $data = cache()->get($cacheKey, []);
+    if (empty($data)) {
         return $this->success([
-            'total_count' => $devices->count(),
-            'devices' => $devices,
+            'total_count' => 0,
+            'devices' => [],
         ]);
     }
+
+    $devices = collect($data)
+        ->filter(fn($item) => is_array($item) && isset($item['aliveips']))
+        ->flatMap(fn($item) => collect($item['aliveips'])->map(fn($ip) => [
+            'ip' => $ip,
+            'last_seen' => $item['lastupdateAt'] ?? null
+        ]))
+        ->unique('ip')
+        ->values();
+
+    return $this->success([
+        'total_count' => $devices->count(),
+        'devices' => $devices,
+    ]);
+}
 
     public function removeActiveSession(Request $request)
     {
