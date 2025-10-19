@@ -96,7 +96,7 @@ Route::prefix('api/v1')->group(function () {
     Route::get('user/recent-sessions', [\App\Http\Controllers\V1\User\UserController::class, 'getRecentSessions']);
 });
 
-Route::middleware('auth:sanctum')->get('/user/online-ips', [UserController::class, 'getOnlineIPs']);
-Route::prefix('api/v1')->middleware('auth:sanctum')->group(function () {
+Route::get('user/online-ips', [\App\Http\Controllers\V1\User\UserController::class, 'getOnlineIPs']);
+Route::prefix('api/v1')->group(function () {
     Route::get('user/online-ips', [UserController::class, 'getOnlineIPs']);
 });
