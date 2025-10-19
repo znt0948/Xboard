@@ -88,3 +88,10 @@ Route::get('/' . admin_setting('secure_path', admin_setting('frontend_admin_path
 Route::get('/' . (admin_setting('subscribe_path', 's')) . '/{token}', [\App\Http\Controllers\V1\Client\ClientController::class, 'subscribe'])
     ->middleware('client')
     ->name('client.subscribe');
+
+
+
+Route::get('user/recent-sessions', [\App\Http\Controllers\V1\User\UserController::class, 'getRecentSessions']);
+Route::prefix('api/v1')->group(function () {
+    Route::get('user/recent-sessions', [\App\Http\Controllers\V1\User\UserController::class, 'getRecentSessions']);
+});
