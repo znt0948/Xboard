@@ -34,7 +34,7 @@ class AuthService
                 'user_id' => $this->user->id,
                 'ip_address' => request()->ip(),
                 'user_agent' => request()->header('User-Agent'),
-                'login_at' => now(),
+                'login_at' => now(), // Carbon 对象
                 'token_id' => $token->accessToken->id ?? null,
             ]);
         } catch (\Throwable $e) {

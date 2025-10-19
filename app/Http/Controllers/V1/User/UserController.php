@@ -254,7 +254,7 @@ class UserController extends Controller
             return [
                 'ip' => $s->ip_address ?? null,
                 'ua' => $s->user_agent ?? null,
-                'login_at' => $s->login_at?->timestamp ?? null, // 返回时间戳
+                'login_at' => $s->login_at ? $s->login_at->timestamp : null, // 返回 Unix 时间戳
             ];
         });
 

@@ -90,7 +90,7 @@ Route::get('/' . (admin_setting('subscribe_path', 's')) . '/{token}', [\App\Http
     ->name('client.subscribe');
 
 
-
+// 好像这俩都用到过
 Route::get('user/recent-sessions', [\App\Http\Controllers\V1\User\UserController::class, 'getRecentSessions']);
 Route::prefix('api/v1')->group(function () {
     Route::get('user/recent-sessions', [\App\Http\Controllers\V1\User\UserController::class, 'getRecentSessions']);
