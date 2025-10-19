@@ -20,6 +20,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
 use App\Services\UserOnlineService; // 在文件顶部的 use 列表加入
+use Illuminate\Support\Facades\Log;
 use App\Models\UserSession;
 
 class UserController extends Controller
@@ -49,10 +50,12 @@ public function getOnlineIPs(Request $request)
 
     $data = cache()->get($cacheKey, []);
     if (empty($data)) {
-        return $this->success([
+        $result = [
             'total_count' => 0,
             'devices' => [],
-        ]);
+        ];
+        Log::info('getOnlineIPs empty', ['user_id' => $userId, 'result' => $result]);
+        return $this->success($result);
     }
 
     $devices = collect($data)
@@ -64,10 +67,12 @@ public function getOnlineIPs(Request $request)
         ->unique('ip')
         ->values();
 
-    return $this->success([
+    $result = [
         'total_count' => $devices->count(),
         'devices' => $devices,
-    ]);
+    ];
+    Log::info('getOnlineIPs result', ['user_id' => $userId, 'result' => $result]);
+    return $this->success($result);
 }
 
     public function removeActiveSession(Request $request)
