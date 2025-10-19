@@ -45,25 +45,36 @@ class UserController extends Controller
     public function getOnlineIPs(Request $request)
     {
         $userId = $request->user()->id;
+        $cacheKey = 'ALIVE_IP_USER_' . $userId;
 
-        // 调用 UserOnlineService 获取在线设备信息
-        $onlineService = app(\App\Services\UserOnlineService::class);
-        $data = $onlineService->getUserDevices((int)$userId); 
+        $data = cache()->get($cacheKey, []);
+        if (empty($data)) {
+            return $this->success([
+                'total_count' => 0,
+                'devices' => [],
+            ]);
+        }
 
-        // 去重并格式化
-        $formatted = collect($data['devices'])
-            ->unique('ip') // 按 IP 去重
-            ->map(function ($item) {
-                return [
-                    'ip' => $item['ip'],
-                    'last_seen' => $item['last_seen'] ?? null,
-                ];
+        $devices = collect($data)
+            ->filter(function ($item) {
+                return is_array($item) && isset($item['aliveips']);
             })
+            ->flatMap(function ($item) {
+                $ips = $item['aliveips'] ?? [];
+                $time = $item['lastupdateAt'] ?? null;
+                return collect($ips)->map(function ($ip) use ($time) {
+                    return [
+                        'ip' => $ip,
+                        'last_seen' => $time,
+                    ];
+                });
+            })
+            ->unique('ip')
             ->values();
 
         return $this->success([
-            'total_count' => $formatted->count(),
-            'devices' => $formatted,
+            'total_count' => $devices->count(),
+            'devices' => $devices,
         ]);
     }
 
