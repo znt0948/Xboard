@@ -43,12 +43,27 @@ class UserController extends Controller
     }
 
     public function getOnlineIPs(Request $request)
-{
-    $userId = $request->user()->id;
-    $devices = UserOnlineService::getUserDevices($userId);
+    {
+        $userId = $request->user()->id;
 
-    return $this->success($devices);
-}
+        // 调用 UserOnlineService 获取在线设备信息
+        $onlineService = app(\App\Services\UserOnlineService::class);
+        $data = $onlineService::getUserDevices((int)$userId);
+
+        // 格式化返回
+        $formatted = collect($data['devices'])->map(function ($item) {
+            return [
+                'ip' => $item['ip'],
+                'last_seen' => $item['last_seen'],
+                'node_type' => $item['node_type'] ?? 'unknown',
+            ];
+        })->values();
+
+        return $this->success([
+            'total_count' => $data['total_count'],
+            'devices' => $formatted,
+        ]);
+    }
 
     public function removeActiveSession(Request $request)
     {
