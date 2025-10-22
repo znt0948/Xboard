@@ -137,8 +137,8 @@ protected function buildOutbounds()
     $tagFilters = [
         'vpn-out' => ['VPN'],
         'download-out' => ['BUD'],
-        '智能择优' => ['!VPN', '!BUD'], // 示例：排除 VPN 和 BUD
-        '省流模式' => ['1.0x'],
+        '智能优选' => ['!VPN', '!BUD'], // 示例：排除 VPN 和 BUD
+        '流量节省' => ['1.0x'],
         '手动选择' => [null],
         '电信优化' => ['BGP', 'TEL'],
         '联通优化' => ['BGP', 'UNI'],
