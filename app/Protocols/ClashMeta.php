@@ -158,10 +158,10 @@ class ClashMeta extends AbstractProtocol
     public function buildRules($config)
     {
         // Force the current subscription domain to be a direct rule
-        $subsDomain = request()->header('Host');
-        if ($subsDomain) {
-            array_unshift($config['rules'], "DOMAIN,{$subsDomain},DIRECT");
-        }
+        //$subsDomain = request()->header('Host');
+        //if ($subsDomain) {
+        //    array_unshift($config['rules'], "DOMAIN,{$subsDomain},DIRECT");
+        //}
         // // Force the nodes ip to be a direct rule
         // collect($this->servers)->pluck('host')->map(function ($host) {
         //     $host = trim($host);
