@@ -189,6 +189,11 @@
       background-color: #1a1a1a;
     }
 
+    /* 夜间模式下使用浅色 logo */
+    :root.dark-theme .footer-logo img {
+       content: url('./images/logo-dark.png') !important;
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -585,6 +590,7 @@
       stroke: var(--primary-color);
       stroke-width: 1.5;
     }
+
 
     .copyright {
       color: var(--text-light);
