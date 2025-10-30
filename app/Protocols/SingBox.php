@@ -136,6 +136,7 @@ protected function buildOutbounds()
     // 2. 定义筛选规则：null 表示全加入，!开头表示排除
     $tagFilters = [
         'vpn-out' => ['VPN'],
+        'vpn-us-out' => ['VPN', '!MY'], // 示例：带 VPN 不带 MY
         'download-out' => ['BUD'],
         '智能优选' => ['!VPN', '!BUD'], // 示例：排除 VPN 和 BUD
         '流量节省' => ['1.0x'],
