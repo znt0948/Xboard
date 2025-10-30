@@ -111,7 +111,7 @@ protected function buildOutbounds()
                 $proxies[] = $this->buildVmess($this->user['uuid'], $item);
                 break;
             case Server::TYPE_VLESS:
-                if (in_array(data_get($protocol_settings, 'network'), ['tcp', 'ws', 'grpc', 'http', 'quic', 'httpupgrade'])) {
+                if (in_array(data_get($protocol_settings, 'network'), ['tcp','ws','grpc','http','quic','httpupgrade'])) {
                     $proxies[] = $this->buildVless($this->user['uuid'], $item);
                 }
                 break;
@@ -133,17 +133,17 @@ protected function buildOutbounds()
         }
     }
 
-    // 2. 定义筛选规则：null 表示全加入，!开头表示排除
+    // 2. 定义正则筛选规则
     $tagFilters = [
-        'vpn-out' => ['VPN'],
-        'vpn-us-out' => ['VPN', '!MY'], // 示例：带 VPN 不带 MY
-        'download-out' => ['BUD'],
-        '智能优选' => ['!VPN', '!BUD'], // 示例：排除 VPN 和 BUD
-        '流量节省' => ['1.0x'],
-        '手动选择' => ['!VPN', '!BUD'],
-        '电信优化' => ['BGP', 'TEL'],
-        '联通优化' => ['BGP', 'UNI'],
-        '移动优化' => ['BGP', 'MOB']
+        'vpn-out'       => '/VPN/i',                     // 包含 VPN
+        'vpn-us-out'    => '/VPN(?!.*MY)/i',            // VPN 不包含 MY
+        'download-out'  => '/BUD/i',                     // 包含 BUD
+        '智能优选'       => '/^(?!.*(VPN|BUD)).*$/i',    // 不包含 VPN/BUD
+        '流量节省'       => '/1\.0x/i',                  // 包含 1.0x
+        '手动选择'       => '/^(?!.*(VPN|BUD)).*$/i',    // 不包含 VPN/BUD
+        '电信优化'       => '/BGP|TEL/i',                // 包含 BGP 或 TEL
+        '联通优化'       => '/BGP|UNI/i',                // 包含 BGP 或 UNI
+        '移动优化'       => '/BGP|MOB/i',                // 包含 BGP 或 MOB
     ];
 
     // 3. 给 selector/urltest 类型 outbound 添加 proxy
@@ -152,7 +152,7 @@ protected function buildOutbounds()
             continue;
         }
 
-        if (!in_array($outbound['type'], ['urltest', 'selector'])) {
+        if (!in_array($outbound['type'], ['urltest','selector'])) {
             continue;
         }
 
@@ -161,46 +161,12 @@ protected function buildOutbounds()
             continue;
         }
 
-        $filterRules = $tagFilters[$tag];
+        $regex = $tagFilters[$tag];
         $matchedTags = [];
 
-        // 3a. null → 全部加入
-        if (is_null($filterRules)) {
-            $matchedTags = array_column($proxies, 'tag');
-        } else {
-            // 3b. 按关键词包含/排除
-            foreach ($proxies as $proxy) {
-                $include = true; 
-                $hasIncludeRule = false;
-
-                foreach ($filterRules as $keyword) {
-                    if (str_starts_with($keyword, '!')) {
-                        // 排除规则
-                        $kw = substr($keyword, 1);
-                        if (stripos($proxy['tag'], $kw) !== false) {
-                            $include = false; 
-                            break; // 命中排除 → 不加
-                        }
-                    } else {
-                        // 包含规则
-                        $hasIncludeRule = true;
-                        if (stripos($proxy['tag'], $keyword) !== false) {
-                            $include = true; // 命中包含 → 加
-                            break;
-                        } else {
-                            $include = false; // 没命中当前包含
-                        }
-                    }
-                }
-
-                // 如果有正向规则但都没命中 → 不加
-                if ($hasIncludeRule && !$include) {
-                    continue;
-                }
-
-                if ($include) {
-                    $matchedTags[] = $proxy['tag'];
-                }
+        foreach ($proxies as $proxy) {
+            if (preg_match($regex, $proxy['tag'])) {
+                $matchedTags[] = $proxy['tag'];
             }
         }
 
