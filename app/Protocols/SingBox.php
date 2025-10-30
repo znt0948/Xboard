@@ -136,7 +136,7 @@ protected function buildOutbounds()
     // 2. 定义正则筛选规则
     $tagFilters = [
         'vpn-out'       => '/VPN/i',                     // 包含 VPN
-        'vpn-us-out'    => '/VPN(?!.*MY)/i',            // VPN 不包含 MY
+        'vpn-us-out'    => '/^(?=.*VPN)(?!.*MY).*$/i',
         'download-out'  => '/BUD/i',                     // 包含 BUD
         '智能优选'       => '/^(?!.*(VPN|BUD)).*$/i',    // 不包含 VPN/BUD
         '流量节省'       => '/1\.0x/i',                  // 包含 1.0x
