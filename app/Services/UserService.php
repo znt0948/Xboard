@@ -34,15 +34,15 @@ class UserService
         }
 
         // 当前时间，使用系统时区或指定时区
-        $now = Carbon::now(); // 可改为 Carbon::now('Asia/Shanghai') 如果你想用北京时间
+        $now = Carbon::now(config('app.timezone')); // 可改为 Carbon::now('Asia/Shanghai') 如果你想用北京时间
         $resetTime = $nextResetTime->copy()->startOfDay(); // 保证重置时间从当天0点开始计算
 
         if ($resetTime->lessThanOrEqualTo($now)) {
             return 0;
         }
 
-        // 剩余天数
-        $daysDifference = $now->diffInDays($resetTime);
+        // 剩余天数，考虑顺序差（allow negative = false）
+        $daysDifference = $now->diffInDays($resetTime, false);
 
         return $daysDifference;
     }
