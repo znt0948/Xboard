@@ -42,7 +42,7 @@ class UserService
         }
 
         // 剩余天数，考虑顺序差（allow negative = false）
-        $daysDifference = $now->diffInDays($resetTime, false);
+        $daysDifference = max(1, ceil($now->diffInHours($resetTime) / 24));
 
         return $daysDifference;
     }
