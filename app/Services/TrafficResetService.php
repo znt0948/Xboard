@@ -113,7 +113,12 @@ class TrafficResetService
    */
   private function getNextMonthFirstDay(Carbon $from): Carbon
   {
-    return $from->copy()->addMonth()->startOfMonth();
+      // 如果明天是1号 → 明天就是重置日
+      if ($from->copy()->addDay()->isStartOfMonth()) {
+          return $from->copy()->addDay()->startOfDay();
+      }
+
+      return $from->copy()->addMonthNoOverflow()->startOfMonth();
   }
 
   /**
