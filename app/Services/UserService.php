@@ -14,16 +14,18 @@ use App\Services\TrafficResetService;
 use App\Models\TrafficResetLog;
 use App\Utils\Helper;
 use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
 
 class UserService
 {
     /**
      * Get the remaining days until the next traffic reset for a user.
      * This method reuses the TrafficResetService logic for consistency.
+     * 
+     * dev: try to fix reset date
      */
     public function getResetDay(User $user): ?int
     {
-        // Use TrafficResetService to calculate the next reset time
         $trafficResetService = app(TrafficResetService::class);
         $nextResetTime = $trafficResetService->calculateNextResetTime($user);
 
@@ -31,18 +33,18 @@ class UserService
             return null;
         }
 
-        // Calculate the remaining days from now to the next reset time
-        $now = time();
-        $resetTimestamp = $nextResetTime->timestamp;
+        // 当前时间，使用系统时区或指定时区
+        $now = Carbon::now(); // 可改为 Carbon::now('Asia/Shanghai') 如果你想用北京时间
+        $resetTime = $nextResetTime->copy()->startOfDay(); // 保证重置时间从当天0点开始计算
 
-        if ($resetTimestamp <= $now) {
-            return 0; // Reset time has passed or is now
+        if ($resetTime->lessThanOrEqualTo($now)) {
+            return 0;
         }
 
-        // Calculate the difference in days (rounded up)
-        $daysDifference = ceil(($resetTimestamp - $now) / 86400);
+        // 剩余天数
+        $daysDifference = $now->diffInDays($resetTime);
 
-        return (int) $daysDifference;
+        return $daysDifference;
     }
 
     public function isAvailable(User $user)
