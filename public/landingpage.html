@@ -135,40 +135,62 @@
     }
 
 .hero-image {
-  max-width: 85%;     /* 保持原尺寸 */
-  border-radius: 12px; 
+  max-width: 85%;
+  border-radius: 12px;
   margin: 0 auto;
   display: block;
-  position: relative;  /* 保证卡片相对它定位 */
-  z-index: 1;
-  animation: scaleIn 1.2s ease 0.8s both; /* 保留现有动画 */
+  position: relative;
+  z-index: 1; /* 保证浮动元素在上层 */
+  animation: scaleIn 1.2s ease 0.8s both;
 }
 
-.floating-cards {
-  position: relative;  /* 或者 absolute 相对于 hero 容器 */
+/* 图外浮动卡片 */
+.floating-cards-outside {
+  position: absolute;
+  top: 50%;
   width: 100%;
-  max-width: 900px;
-  margin: 0 auto;
-  top: -250px;        /* 调整卡片到 hero-image 上方 */
+  height: 0;
+  pointer-events: none;
   z-index: 2;
 }
 
 .float-card {
-  position: absolute;  /* 相对于 .floating-cards */
+  position: absolute;
   width: 120px;
-  height: auto;
   opacity: 0.9;
   animation: floatMotion 6s ease-in-out infinite;
   filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15));
 }
 
-/* 每张卡片初始位置不同 */
-.card1 { top: -40px; left: 10%; animation-delay: 0s; }
-.card2 { top: 20px; right: 15%; animation-delay: 1.5s; }
-.card3 { bottom: -30px; left: 25%; animation-delay: 3s; }
-.card4 { bottom: -50px; right: 20%; animation-delay: 4.5s; }
+/* 左右散落位置 */
+.card1 { left: -140px; top: 10%; animation-delay: 0s; }
+.card2 { left: -120px; bottom: 20%; animation-delay: 1.5s; }
+.card3 { right: -140px; top: 20%; animation-delay: 3s; }
+.card4 { right: -120px; bottom: 10%; animation-delay: 4.5s; }
 
-/* 浮动动画 */
+/* 浮动 drone（图内部） */
+.floating-drones {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.drone {
+  position: absolute;
+  width: 80px;
+  animation: floatMotion 5s ease-in-out infinite;
+}
+
+/* drone 初始位置（图内部） */
+.drone1 { top: 20%; left: 25%; animation-delay: 0s; }
+.drone2 { top: 40%; right: 25%; animation-delay: 2s; }
+
+/* 漂浮动画 */
 @keyframes floatMotion {
   0%, 100% { transform: translateY(0px) rotate(0deg); }
   50% { transform: translateY(-12px) rotate(2deg); }
@@ -977,12 +999,18 @@
   <!-- 背景图 -->
   <img src="/images/hero.png" alt="Dashboard Preview" class="hero-image">
 
-  <!-- 浮动卡片容器 -->
-  <div class="floating-cards">
+  <!-- 浮动卡片（图外左右两侧） -->
+  <div class="floating-cards-outside">
     <img src="/images/float-card.png" alt="Floating Card" class="float-card card1">
     <img src="/images/float-card.png" alt="Floating Card" class="float-card card2">
     <img src="/images/float-card.png" alt="Floating Card" class="float-card card3">
     <img src="/images/float-card.png" alt="Floating Card" class="float-card card4">
+  </div>
+
+  <!-- 浮动 drone（图内部） -->
+  <div class="floating-drones">
+    <img src="/images/drone.png" alt="Drone" class="drone drone1">
+    <img src="/images/drone.png" alt="Drone" class="drone drone2">
   </div>
 
 </section>
