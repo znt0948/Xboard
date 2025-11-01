@@ -158,17 +158,17 @@
 
 .float-card {
   position: absolute;
-  width: 100px; /* 稍微小一点，更紧凑 */
+  width: 100px; /* 保持大小 */
   opacity: 0.9;
   animation: floatMotion 6s ease-in-out infinite;
   filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15));
 }
 
-/* 左右散落位置（靠近主图两侧，紧凑布局） */
-.card1 { left: -80px; top: 20%; animation-delay: 0s; }
-.card2 { left: -60px; bottom: 15%; animation-delay: 1.5s; }
-.card3 { right: -80px; top: 15%; animation-delay: 3s; }
-.card4 { right: -60px; bottom: 20%; animation-delay: 4.5s; }
+/* 放在主图内部，靠近两侧 */
+.card1 { left: 5%; top: 10%; animation-delay: 0s; }
+.card2 { left: 5%; bottom: 15%; animation-delay: 1.5s; }
+.card3 { right: 5%; top: 5%; animation-delay: 3s; }
+.card4 { right: 5%; bottom: 20%; animation-delay: 4.5s; }
 
 /* 浮动 drone（图内部，靠近主图中心） */
 .floating-drones {
@@ -189,7 +189,7 @@
 }
 
 /* drone 初始位置（靠近主图中心） */
-.drone1 { top: 25%; left: 30%; animation-delay: 0s; }
+.drone1 { top: 30%; left: 30%; animation-delay: 0s; }
 .drone2 { top: 40%; left: 60%; animation-delay: 2s; }
 
 /* 漂浮动画 */
