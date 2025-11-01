@@ -135,9 +135,27 @@
     }
 
     .hero-image {
-      animation: scaleIn 1.2s ease 0.8s both;
+      width: 100%;
+      max-width: 800px;
+      display: block;
+      margin: 0 auto;
+      transition: transform 0.3s ease;
     }
 
+    /* 添加浮动动画 */
+    .floating {
+      animation: floatMotion 6s ease-in-out infinite;
+    }
+
+    /* 动画关键帧 */
+    @keyframes floatMotion {
+      0%, 100% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
     .feature-card {
       animation: slideUp 0.8s ease both;
       animation-play-state: paused; /* 暂停动画，直到元素进入视口 */
@@ -912,8 +930,8 @@
   <div class="container">
 
   <!-- 动态渐变标题 -->
-  <h1 class="hero-title mb-4" style="
-    font-size: 3rem;
+  <h1 class="hero-title mb-4 sparkle-text" style="
+    font-size: 4rem;
     font-weight: 900;
     background: linear-gradient(270deg, #2a2685, #3d5afe, #302c89, #00bcd4);
     background-size: 600% 600%;
@@ -939,7 +957,7 @@
   </div>
 
   <!-- 背景图 -->
-  <img src="/images/hero.png" alt="Dashboard Preview" class="hero-image">
+  <img src="/images/hero.png" alt="Dashboard Preview" class="hero-image floating">
 </section>
 
 <section class="features" id="features">
@@ -1143,6 +1161,44 @@
     background-position: 0% 50%;
   }
 }
+
+.hero-title.sparkle-text {
+  position: relative;
+  font-size: 4rem;
+  font-weight: 900;
+  background: linear-gradient(270deg, #2a2685, #3d5afe, #302c89, #00bcd4);
+  background-size: 600% 600%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientFlow 8s ease infinite;
+  letter-spacing: 2px;
+}
+
+.hero-title.sparkle-text::before,
+.hero-title.sparkle-text::after {
+  content: "✨";
+  position: absolute;
+  animation: sparkle 3s infinite ease-in-out;
+  opacity: 0;
+}
+
+.hero-title.sparkle-text::before {
+  top: 10%;
+  left: 20%;
+  animation-delay: 1s;
+}
+
+.hero-title.sparkle-text::after {
+  bottom: 15%;
+  right: 25%;
+  animation-delay: 2s;
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 0; transform: scale(0.5) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1.2) rotate(180deg); }
+}
+
 </style>
 
   <section class="download" id="download">
