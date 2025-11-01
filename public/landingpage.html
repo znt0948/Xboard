@@ -153,6 +153,7 @@
   left: 0;
   pointer-events: none; /* 避免挡住主图交互 */
   z-index: 2;
+  animation: scaleIn 1.2s ease 1.5s both;
 }
 
 /* 图片浮动 */
@@ -166,27 +167,27 @@
 
 /* 放在主图内部，靠近两侧 */
 /* 放在主图内部，靠近主图中心 */
-.card1 { left: 35%; bottom: 32%; animation-delay: 0s; }
-.card2 { left: 30%; bottom: 37%; animation-delay: 1.5s; }
-.card3 { right: 35%; bottom: 32%; animation-delay: 3s; }
-.card4 { right: 30%; bottom: 37%; animation-delay: 4.5s; }
+.card1 { left: 35%; bottom: 20%; animation-delay: 0s; }
+.card2 { left: 30%; bottom: 25%; animation-delay: 1.5s; }
+.card3 { right: 35%; bottom: 20%; animation-delay: 3s; }
+.card4 { right: 30%; bottom: 25%; animation-delay: 4.5s; }
 
 /* 浮动 drone（图内部，靠近主图中心） */
-.floating-drones {
+.floating-drones-wrapper {
   position: absolute;
   top: 0;
-  left: 50%;
-  width: 55%; /* 与主图宽度保持一致 */
+  left: 0;
+  width: 100%;
   height: 160%;
-  transform: translateX(-50%);
   pointer-events: none;
   z-index: 3;
+  animation: scaleIn 1.2s ease 1.5s both; /* 父容器淡入缩放 */
 }
 
 .drone {
   position: absolute;
-  width: 60px; /* 稍微小一些，贴合主图 */
-  animation: floatMotion 5s ease-in-out infinite;
+  width: 60px;
+  animation: floatMotion 5s ease-in-out infinite; 
 }
 
 /* drone 初始位置（靠近主图中心） */
@@ -1011,7 +1012,7 @@
   </div>
 
   <!-- 浮动 drone（图内部） -->
-  <div class="floating-drones">
+  <div class="floating-drones-wrapper">
     <img src="/images/drone.png" alt="Drone" class="drone drone1">
     <img src="/images/drone.png" alt="Drone" class="drone drone2">
   </div>
