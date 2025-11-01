@@ -144,11 +144,13 @@
   animation: scaleIn 1.2s ease 0.8s both;
 }
 
-/* 图外浮动卡片 */
+/* 图外浮动卡片（靠近主图两侧） */
 .floating-cards-outside {
   position: absolute;
   top: 50%;
-  width: 100%;
+  width: 85%; /* 与主图宽度保持一致，让浮动元素紧贴主图 */
+  left: 50%;
+  transform: translateX(-50%);
   height: 0;
   pointer-events: none;
   z-index: 2;
@@ -156,25 +158,25 @@
 
 .float-card {
   position: absolute;
-  width: 120px;
+  width: 100px; /* 稍微小一点，更紧凑 */
   opacity: 0.9;
   animation: floatMotion 6s ease-in-out infinite;
   filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15));
 }
 
-/* 左右散落位置 */
-.card1 { left: -140px; top: 10%; animation-delay: 0s; }
-.card2 { left: -120px; bottom: 20%; animation-delay: 1.5s; }
-.card3 { right: -140px; top: 20%; animation-delay: 3s; }
-.card4 { right: -120px; bottom: 10%; animation-delay: 4.5s; }
+/* 左右散落位置（靠近主图两侧，紧凑布局） */
+.card1 { left: -80px; top: 20%; animation-delay: 0s; }
+.card2 { left: -60px; bottom: 15%; animation-delay: 1.5s; }
+.card3 { right: -80px; top: 15%; animation-delay: 3s; }
+.card4 { right: -60px; bottom: 20%; animation-delay: 4.5s; }
 
-/* 浮动 drone（图内部） */
+/* 浮动 drone（图内部，靠近主图中心） */
 .floating-drones {
   position: absolute;
   top: 0;
   left: 50%;
-  width: 100%;
-  height: 100%;
+  width: 55%; /* 与主图宽度保持一致 */
+  height: 160%;
   transform: translateX(-50%);
   pointer-events: none;
   z-index: 3;
@@ -182,13 +184,13 @@
 
 .drone {
   position: absolute;
-  width: 80px;
+  width: 60px; /* 稍微小一些，贴合主图 */
   animation: floatMotion 5s ease-in-out infinite;
 }
 
-/* drone 初始位置（图内部） */
-.drone1 { top: 20%; left: 25%; animation-delay: 0s; }
-.drone2 { top: 40%; right: 25%; animation-delay: 2s; }
+/* drone 初始位置（靠近主图中心） */
+.drone1 { top: 25%; left: 30%; animation-delay: 0s; }
+.drone2 { top: 40%; left: 60%; animation-delay: 2s; }
 
 /* 漂浮动画 */
 @keyframes floatMotion {
