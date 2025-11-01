@@ -911,22 +911,24 @@
 <section class="hero hero-1 text-center">
   <div class="container">
 
-    <!-- 主标题（保留原来的蓝色风格） -->
-    <h1 class="hero-title mb-4" style="
-        font-size: 3rem;
-        font-weight: 900;
-        background: linear-gradient(90deg, #2a2685, #302c89);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        letter-spacing: 2px;
-    ">
-      HZ-EXTENSION
-    </h1>
+  <!-- 动态渐变标题 -->
+  <h1 class="hero-title mb-4" style="
+    font-size: 3rem;
+    font-weight: 900;
+    background: linear-gradient(270deg, #2a2685, #3d5afe, #302c89, #00bcd4);
+    background-size: 600% 600%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientFlow 8s ease infinite;
+    letter-spacing: 2px;
+  ">
+    HZ-EXTENSION
+  </h1>
 
     <!-- 副标题 -->
     <p class="hero-subtitle mb-4" ; font-size: 1rem; line-height: 1.8;">
-      通过覆盖全球的路由骨干实现网络流量分发<br>
-      峰值1200Mbps的单线接入能力
+      构建全球互联的高性能传输网络<br>
+      专为企业与开发者打造的 1200Mbps 单线接入通道<br> 
     </p>
 
     <!-- 按钮 -->
@@ -1127,6 +1129,18 @@
   .feature-img {
     max-width: 100%;
     margin-top: 20px;
+  }
+}
+
+@keyframes gradientFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
   }
 }
 </style>
@@ -1393,7 +1407,7 @@
 <section class="cta">
     <div class="cta-container">
       <h3>准备好开始您的探索了吗？</h3>
-      <p>加入我们，让世界触手可及</p>
+      <p>加入我们，创造无限可能</p>
       <a href="javascript:void(0)" onclick="navigateTo('register')" class="button cta-button">现在开始</a>
     </div>
   </section>
@@ -1623,7 +1637,7 @@ function setupScrollAnimations() {
           document.getElementById('copyrightText').textContent = config.SITE_CONFIG.copyright;
         }
         
-        /*
+
         // 设置 Hero 标题（多语言支持）
         if (config.SITE_CONFIG.landingText) {
           // 获取浏览器语言
@@ -1634,8 +1648,8 @@ function setupScrollAnimations() {
           
           document.getElementById('heroTitle').textContent = heroText;
         }
-        */
-       
+
+
         // 设置客户端下载链接
         if (config.CLIENT_CONFIG && config.CLIENT_CONFIG.clientLinks) {
           try {
