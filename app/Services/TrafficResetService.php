@@ -86,8 +86,9 @@ class TrafficResetService
       || $user->plan->reset_traffic_method === Plan::RESET_TRAFFIC_NEVER
       || ($user->plan->reset_traffic_method === Plan::RESET_TRAFFIC_FOLLOW_SYSTEM
         && (int) admin_setting('reset_traffic_method', Plan::RESET_TRAFFIC_MONTHLY) === Plan::RESET_TRAFFIC_NEVER)
-      || $user->expired_at === NULL
     ) {
+      // Users with no expiration date (long-term users) should still follow plan-based or system reset rules.
+      // Only plans with RESET_TRAFFIC_NEVER should skip reset, regardless of expired_at value.
       return null;
     }
 
