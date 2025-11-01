@@ -134,28 +134,46 @@
       animation: slideUp 0.8s ease 0.7s both;
     }
 
-    .hero-image {
-      width: 100%;
-      max-width: 800px;
-      display: block;
-      margin: 0 auto;
-      transition: transform 0.3s ease;
-    }
+.hero-image {
+  max-width: 85%;     /* 保持原尺寸 */
+  border-radius: 12px; 
+  margin: 0 auto;
+  display: block;
+  position: relative;  /* 保证卡片相对它定位 */
+  z-index: 1;
+  animation: scaleIn 1.2s ease 0.8s both; /* 保留现有动画 */
+}
 
-    /* 添加浮动动画 */
-    .floating {
-      animation: floatMotion 6s ease-in-out infinite;
-    }
+.floating-cards {
+  position: relative;  /* 或者 absolute 相对于 hero 容器 */
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  top: -250px;        /* 调整卡片到 hero-image 上方 */
+  z-index: 2;
+}
 
-    /* 动画关键帧 */
-    @keyframes floatMotion {
-      0%, 100% {
-        transform: translateY(0px);
-      }
-      50% {
-        transform: translateY(-10px);
-      }
-    }
+.float-card {
+  position: absolute;  /* 相对于 .floating-cards */
+  width: 120px;
+  height: auto;
+  opacity: 0.9;
+  animation: floatMotion 6s ease-in-out infinite;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15));
+}
+
+/* 每张卡片初始位置不同 */
+.card1 { top: -40px; left: 10%; animation-delay: 0s; }
+.card2 { top: 20px; right: 15%; animation-delay: 1.5s; }
+.card3 { bottom: -30px; left: 25%; animation-delay: 3s; }
+.card4 { bottom: -50px; right: 20%; animation-delay: 4.5s; }
+
+/* 浮动动画 */
+@keyframes floatMotion {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(2deg); }
+}
+
     .feature-card {
       animation: slideUp 0.8s ease both;
       animation-play-state: paused; /* 暂停动画，直到元素进入视口 */
@@ -957,7 +975,16 @@
   </div>
 
   <!-- 背景图 -->
-  <img src="/images/hero.png" alt="Dashboard Preview" class="hero-image floating">
+  <img src="/images/hero.png" alt="Dashboard Preview" class="hero-image">
+
+  <!-- 浮动卡片容器 -->
+  <div class="floating-cards">
+    <img src="/images/float-card.png" alt="Floating Card" class="float-card card1">
+    <img src="/images/float-card.png" alt="Floating Card" class="float-card card2">
+    <img src="/images/float-card.png" alt="Floating Card" class="float-card card3">
+    <img src="/images/float-card.png" alt="Floating Card" class="float-card card4">
+  </div>
+
 </section>
 
 <section class="features" id="features">
