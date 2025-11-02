@@ -134,45 +134,50 @@
       animation: slideUp 0.8s ease 0.7s both;
     }
 
+/* ================= Hero 区域 ================= */
+.hero-image-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: fit-content;
+  margin: 0 auto;
+}
+
 .hero-image {
   max-width: 85%;
-  border-radius: 12px;
-  margin: 0 auto;
   display: block;
-  position: relative;
-  z-index: 1; /* 保证浮动元素在上层 */
+  border-radius: 12px;
   animation: scaleIn 1.2s ease 0.8s both;
 }
 
-/* 浮动卡片容器，只定位 */
+/* ================= 浮动卡片 ================= */
 .floating-cards-wrapper {
   position: absolute;
-  width: 100%;
-  height: 100%;
   top: 0;
   left: 0;
-  pointer-events: none; /* 避免挡住主图交互 */
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
   z-index: 2;
-  animation: scaleIn 1.2s ease 1.5s both;
 }
 
-/* 图片浮动 */
 .floating-card {
   position: absolute;
   width: 100px;
   opacity: 0.9;
-  animation: floatMotion 6s ease-in-out infinite;
-  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15));
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
 }
 
-/* 放在主图内部，靠近两侧 */
-/* 放在主图内部，靠近主图中心 */
-.card1 { left: 400px; bottom: 250px; animation-delay: 0s; }
-.card2 { left: 350px; bottom: 290px; animation-delay: 0.5s; }
-.card3 { right: 400px; bottom: 250px; animation-delay: 1s; }
-.card4 { right: 350px; bottom: 290px; animation-delay: 1.5s; }
+/* 卡片位置 */
+.card1 { left: 5%; bottom: 15%; }
+.card6 { right: 5%; bottom: 55%;}
 
-/* 浮动 drone（图内部，靠近主图中心） */
+/* 卡片动画 */
+.card1 { animation: floatA 6s ease-in-out infinite, fadeIn 1.5s ease 1.2s both; }
+.card6 { animation: floatB 8s ease-in-out infinite, fadeIn 1.5s ease 2s both; }
+
+/* ================= 浮动无人机 ================= */
 .floating-drones-wrapper {
   position: absolute;
   top: 0;
@@ -181,25 +186,62 @@
   height: 100%;
   pointer-events: none;
   z-index: 3;
-  animation: scaleIn 1.2s ease 1.5s both; /* 父容器淡入缩放 */
 }
 
 .drone {
   position: absolute;
   width: 60px;
-  animation: floatMotion 5s ease-in-out infinite; 
+  opacity: 0.95;
 }
 
-/* drone 初始位置（靠近主图中心） */
-.drone1 { top: 500px; left: 1200px; animation-delay: 0s; }
-.drone2 { top: 300px; left: 900px; animation-delay: 0.5s; }
+/* 无人机位置及动画 */
+.drone1 { top: 30%; left: 20%; animation: floatC 7s ease-in-out infinite, fadeIn 1.2s ease 1.6s both; }
+.drone2 { top: 45%; right: 20%; animation: floatD 9s ease-in-out infinite, fadeIn 1.2s ease 2.2s both; }
 
-
-/* 漂浮动画 */
-@keyframes floatMotion {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-12px) rotate(2deg); }
+/* ================= 动画定义 ================= */
+/* 浮动卡片动画 */
+@keyframes floatA {
+  0%, 100% { transform: translateY(0) rotate(-6deg); }
+  50% { transform: translateY(-10px) rotate(-4deg); }
 }
+
+@keyframes floatB {
+  0%, 100% { transform: translateY(0) rotate(6deg); }
+  50% { transform: translateY(15px) rotate(9deg); }
+}
+
+/* 无人机浮动动画 */
+@keyframes floatC {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(6px, -12px); }
+}
+
+@keyframes floatD {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-8px, -10px); }
+}
+
+/* 图片淡入动画（仅透明度） */
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/* 图片缩放动画 */
+@keyframes scaleIn {
+  0% { transform: scale(0.95); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ================= 移动端响应 ================= */
+@media (max-width: 768px) {
+  .floating-card { width: 60px; }
+
+
+  .drone { width: 35px; }
+
+}
+
 
     .feature-card {
       animation: slideUp 0.8s ease both;
@@ -219,7 +261,7 @@
     :root {
       --primary-color: #355cc2;
       --primary-color-light: #5c93ff;
-      --primary-rgb: 53, 92, 194; /* RGB值用于透明度计算 */
+      --primary-rgb: 53, 92, 194; /* RGB值用于透明度计算  5c93ff */
       --text-color: #333;
       --text-light: #666;
       --background-color: #fff;
@@ -376,15 +418,16 @@
       stroke: var(--text-color);
     }
 
-    .button {
-      display: inline-block;
-      padding: 10px 20px;
-      border-radius: 24px;
-      font-weight: 500;
-      text-decoration: none;
-      transition: all 0.3s ease;
-      text-align: center;
-    }
+.button {
+  display: inline-block;
+  padding: 6px 14px;       /* 略微缩小内边距 */
+  border-radius: 18px;      /* 略微缩小圆角 */
+  font-size: 0. nine rem;   /* 可根据原来大小略微缩小 */
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  text-align: center;
+}
 
     .primary-button {
       background-color: var(--primary-color);
@@ -975,16 +1018,7 @@
   <div class="container">
 
   <!-- 动态渐变标题 -->
-  <h1 class="hero-title mb-4 sparkle-text" style="
-    font-size: 4rem;
-    font-weight: 900;
-    background: linear-gradient(270deg, #2a2685, #3d5afe, #302c89, #00bcd4);
-    background-size: 600% 600%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: gradientFlow 8s ease infinite;
-    letter-spacing: 2px;
-  ">
+  <h1 class="hero-title mb-4">
     HZ-EXTENSION
   </h1>
 
@@ -996,26 +1030,26 @@
 
     <!-- 按钮 -->
     <div class="hero-buttons">
-      <a href="javascript:void(0)" onclick="navigateTo('register')" class="button primary-button">即刻体验</a>
+      <a href="javascript:void(0)" onclick="navigateTo('register')" class="button primary-button">立即开始</a>
       <a href="#download" class="button secondary-button">下载客户端</a>
     </div>
   </div>
 
-  <!-- 背景图 -->
-  <img src="/images/hero.png" alt="Dashboard Preview" class="hero-image">
+  <div class="hero-image-wrapper">
+    <img src="/images/hero.png" class="hero-image">
 
-  <!-- 浮动卡片容器 -->
-  <div class="floating-cards-wrapper">
-    <img src="/images/float-card.png" alt="Floating Card" class="floating-card card1">
-    <img src="/images/float-card.png" alt="Floating Card" class="floating-card card2">
-    <img src="/images/float-card.png" alt="Floating Card" class="floating-card card3">
-    <img src="/images/float-card.png" alt="Floating Card" class="floating-card card4">
-  </div>
+    <!-- 浮动卡片 -->
+    <div class="floating-cards-wrapper">
+      <img src="/images/float-card.png" class="floating-card card1">
 
-  <!-- 浮动 drone（图内部） -->
-  <div class="floating-drones-wrapper">
-    <img src="/images/drone.png" alt="Drone" class="drone drone1">
-    <img src="/images/drone.png" alt="Drone" class="drone drone2">
+      <img src="/images/float-card.png" class="floating-card card6">
+    </div>
+
+    <!-- 浮动无人机 -->
+    <div class="floating-drones-wrapper">
+      <img src="/images/drone.png" class="drone drone1">
+      <img src="/images/drone.png" class="drone drone2">
+    </div>
   </div>
 
 </section>
@@ -1205,11 +1239,35 @@
   }
 
   .feature-img {
-    max-width: 100%;
+    max-width: 80%;
     margin-top: 20px;
   }
 }
 
+/* 动态流动渐变标题 */
+.hero-title {
+  position: relative;
+  display: inline-block;
+  font-size: 3.5rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  word-wrap: break-word;
+  color: transparent;
+  background: linear-gradient(
+    270deg,
+    #3d5afe,
+    #302c89,
+    #2a2685,
+    #00bcd4,
+    #3d5afe
+  );
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientFlow 10s linear infinite;
+}
+
+/* 流动动画 */
 @keyframes gradientFlow {
   0% {
     background-position: 0% 50%;
@@ -1222,37 +1280,19 @@
   }
 }
 
-.hero-title.sparkle-text {
-  position: relative;
-  font-size: 4rem;
-  font-weight: 900;
-  background: linear-gradient(270deg, #2a2685, #3d5afe, #302c89, #00bcd4);
-  background-size: 600% 600%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: gradientFlow 8s ease infinite;
-  letter-spacing: 2px;
+@media (max-width: 1024px) {
+  .hero-title {
+    font-size: 3rem;
+  }
 }
 
-.hero-title.sparkle-text::before,
-.hero-title.sparkle-text::after {
-  content: "✨";
-  position: absolute;
-  animation: sparkle 3s infinite ease-in-out;
-  opacity: 0;
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.5rem; /* 小屏幕缩小标题 */
+    
+  }
 }
 
-.hero-title.sparkle-text::before {
-  top: 10%;
-  left: 20%;
-  animation-delay: 1s;
-}
-
-.hero-title.sparkle-text::after {
-  bottom: 15%;
-  right: 25%;
-  animation-delay: 2s;
-}
 
 @keyframes sparkle {
   0%, 100% { opacity: 0; transform: scale(0.5) rotate(0deg); }
