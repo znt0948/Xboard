@@ -251,15 +251,10 @@ class Stash extends AbstractProtocol
 
         switch (data_get($protocol_settings, 'network')) {
             case 'tcp':
-                $headerType = data_get($protocol_settings, 'network_settings.header.type', 'tcp');
-                if ($headerType !== 'tcp') {
-                    $array['network'] = $headerType;
-                    if ($httpOpts = array_filter([
-                        'headers' => data_get($protocol_settings, 'network_settings.header.request.headers'),
-                        'path' => data_get($protocol_settings, 'network_settings.header.request.path', ['/'])
-                    ])) {
-                        $array['http-opts'] = $httpOpts;
-                    }
+                $array['network'] = data_get($protocol_settings, 'network_settings.header.type', 'http');
+                $array['http-opts']['path'] = data_get($protocol_settings, 'network_settings.header.request.path', ['/']);
+                if ($host = data_get($protocol_settings, 'network_settings.header.request.headers.Host')) {
+                    $array['http-opts']['headers']['Host'] = $host;
                 }
                 break;
             case 'ws':
@@ -317,11 +312,25 @@ class Stash extends AbstractProtocol
 
         switch (data_get($protocol_settings, 'network')) {
             case 'tcp':
-                if ($headerType = data_get($protocol_settings, 'network_settings.header.type', 'tcp') != 'tcp') {
-                    $array['network'] = $headerType;
+                $headerType = data_get(
+                    $protocol_settings,
+                    'network_settings.header.type',
+                    'tcp'
+                );
+
+                if ($headerType !== 'tcp') {
+                    $array['network'] = (string) $headerType;
+
                     if ($httpOpts = array_filter([
-                        'headers' => data_get($protocol_settings, 'network_settings.header.request.headers'),
-                        'path' => data_get($protocol_settings, 'network_settings.header.request.path', ['/'])
+                        'headers' => data_get(
+                            $protocol_settings,
+                            'network_settings.header.request.headers'
+                        ),
+                        'path' => data_get(
+                            $protocol_settings,
+                            'network_settings.header.request.path',
+                            ['/']
+                        )
                     ])) {
                         $array['http-opts'] = $httpOpts;
                     }
