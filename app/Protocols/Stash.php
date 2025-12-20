@@ -311,31 +311,34 @@ class Stash extends AbstractProtocol
         }
 
         switch (data_get($protocol_settings, 'network')) {
-            case 'tcp':
-                $headerType = data_get(
-                    $protocol_settings,
-                    'network_settings.header.type',
-                    'tcp'
-                );
+                case 'tcp':
+                    $array['network'] = 'tcp';
 
-                if ($headerType !== 'tcp') {
-                    $array['network'] = (string) $headerType;
+                    $headerType = data_get(
+                        $protocol_settings,
+                        'network_settings.header.type'
+                    );
 
-                    if ($httpOpts = array_filter([
-                        'headers' => data_get(
-                            $protocol_settings,
-                            'network_settings.header.request.headers'
-                        ),
-                        'path' => data_get(
-                            $protocol_settings,
-                            'network_settings.header.request.path',
-                            ['/']
-                        )
-                    ])) {
-                        $array['http-opts'] = $httpOpts;
+                    if (is_string($headerType) && $headerType !== 'tcp') {
+                        $array['network'] = $headerType;
+
+                        $httpOpts = array_filter([
+                            'headers' => data_get(
+                                $protocol_settings,
+                                'network_settings.header.request.headers'
+                            ),
+                            'path' => data_get(
+                                $protocol_settings,
+                                'network_settings.header.request.path',
+                                ['/']
+                            ),
+                        ]);
+
+                        if ($httpOpts) {
+                            $array['http-opts'] = $httpOpts;
+                        }
                     }
-                }
-                break;
+                    break;
             case 'ws':
                 $array['network'] = 'ws';
                 $array['ws-opts']['path'] = data_get($protocol_settings, 'network_settings.path');
