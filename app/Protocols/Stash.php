@@ -328,14 +328,11 @@ class Stash extends AbstractProtocol
         }
 
         /* ---------- Network 统一规范化 ---------- */
-        $network = data_get($protocol_settings, 'network');
-
-        // 面板脏数据兜底：不是字符串（如布尔值、null等）一律视为 'tcp'
+        $network = data_get($protocol_settings, 'network', 'tcp');
         if (!is_string($network) || !in_array($network, ['tcp', 'ws', 'grpc', 'http'], true)) {
             $network = 'tcp';
         }
 
-        /* ---------- Network Mapping ---------- */
         switch ($network) {
             case 'ws':
                 $array['network'] = 'ws';
@@ -378,9 +375,7 @@ class Stash extends AbstractProtocol
 
             case 'tcp':
             default:
-                // 默认 TCP
                 $array['network'] = 'tcp';
-                // 仅当 header.type 是字符串且为 http 时，才启用 HTTP 伪装
                 $headerType = data_get($protocol_settings, 'network_settings.header.type');
                 if (is_string($headerType) && $headerType === 'http') {
                     $array['network'] = 'http';
@@ -401,9 +396,6 @@ class Stash extends AbstractProtocol
                 }
                 break;
         }
-
-        // 兜底，保证 network 字段始终为字符串且有效
-        $array['network'] = $array['network'] ?? 'tcp';
 
         return $array;
     }
