@@ -275,9 +275,9 @@ class Stash extends AbstractProtocol
         return $array;
     }
 
-        public function buildVless($uuid, $server)
+    public function buildVless($uuid, $server)
     {
-        $protocol_settings = $server['protocol_settings'];
+        $protocol_settings = $server['protocol_settings'] ?? [];
         $array = [];
 
         $array['name'] = $server['name'];
@@ -286,51 +286,79 @@ class Stash extends AbstractProtocol
         $array['port'] = $server['port'];
         $array['uuid'] = $uuid;
         $array['udp'] = true;
-
         $array['client-fingerprint'] = Helper::getRandFingerprint();
 
         /* ---------- TLS / Reality ---------- */
-        switch (data_get($protocol_settings, 'tls')) {
-            case 1:
-                $array['tls'] = true;
-                $array['skip-cert-verify'] = (bool) data_get($protocol_settings, 'tls_settings.allow_insecure');
-                if ($serverName = data_get($protocol_settings, 'tls_settings.server_name')) {
-                    $array['servername'] = $serverName;
-                }
-                break;
+        $tlsMode = data_get($protocol_settings, 'tls');
 
-            case 2: // Reality
-                $array['tls'] = true;
-                if ($serverName = data_get($protocol_settings, 'reality_settings.server_name')) {
-                    $array['servername'] = $serverName;
-                    $array['sni'] = $serverName;
-                }
-                $array['flow'] = data_get($protocol_settings, 'flow');
-                $array['reality-opts'] = [
-                    'public-key' => data_get($protocol_settings, 'reality_settings.public_key'),
-                    'short-id'   => data_get($protocol_settings, 'reality_settings.short_id'),
-                ];
-                break;
+        if ($tlsMode === 1) {
+            $array['tls'] = true;
+            $array['skip-cert-verify'] = (bool) data_get($protocol_settings, 'tls_settings.allow_insecure', false);
+
+            if ($serverName = data_get($protocol_settings, 'tls_settings.server_name')) {
+                $array['servername'] = $serverName;
+            }
         }
 
-        /* ---------- Network 归一化（关键修复） ---------- */
-        $rawNetwork = data_get($protocol_settings, 'network');
+        if ($tlsMode === 2) { // Reality
+            $array['tls'] = true;
 
-        // XBoard 兼容：true / false / null → tcp
-        if ($rawNetwork === true || $rawNetwork === false || $rawNetwork === null) {
-            $rawNetwork = 'tcp';
+            if ($serverName = data_get($protocol_settings, 'reality_settings.server_name')) {
+                $array['servername'] = $serverName;
+                $array['sni'] = $serverName;
+            }
+
+            if ($flow = data_get($protocol_settings, 'flow')) {
+                $array['flow'] = $flow;
+            }
+
+            $array['reality-opts'] = array_filter([
+                'public-key' => data_get($protocol_settings, 'reality_settings.public_key'),
+                'short-id'   => data_get($protocol_settings, 'reality_settings.short_id'),
+            ]);
+        }
+
+        /* ---------- Network 统一规范化 ---------- */
+        $network = data_get($protocol_settings, 'network');
+
+        // 面板脏数据兜底：bool / null 一律视为 tcp
+        if (!is_string($network)) {
+            $network = 'tcp';
         }
 
         /* ---------- Network Mapping ---------- */
-        switch ($rawNetwork) {
+        switch ($network) {
+            case 'ws':
+                $array['network'] = 'ws';
+                $array['ws-opts'] = [
+                    'path' => data_get($protocol_settings, 'network_settings.path', '/'),
+                ];
+
+                if ($host = data_get($protocol_settings, 'network_settings.headers.Host')) {
+                    $array['ws-opts']['headers'] = ['Host' => $host];
+                }
+                break;
+
+            case 'grpc':
+                $array['network'] = 'grpc';
+                $array['grpc-opts'] = [
+                    'grpc-service-name' => data_get(
+                        $protocol_settings,
+                        'network_settings.serviceName'
+                    ),
+                ];
+                break;
+
             case 'tcp':
+            default:
+                // 默认 TCP
                 $array['network'] = 'tcp';
 
-                // TCP Header 伪装（HTTP）
+                // 仅当 header.type 是字符串且为 http 时，才启用 HTTP 伪装
                 $headerType = data_get($protocol_settings, 'network_settings.header.type');
 
-                if (is_string($headerType) && $headerType !== 'tcp') {
-                    $array['network'] = $headerType;
+                if (is_string($headerType) && $headerType === 'http') {
+                    $array['network'] = 'http';
 
                     $httpOpts = array_filter([
                         'headers' => data_get(
@@ -348,26 +376,6 @@ class Stash extends AbstractProtocol
                         $array['http-opts'] = $httpOpts;
                     }
                 }
-                break;
-
-            case 'ws':
-                $array['network'] = 'ws';
-                $array['ws-opts'] = [
-                    'path' => data_get($protocol_settings, 'network_settings.path', '/'),
-                ];
-                if ($host = data_get($protocol_settings, 'network_settings.headers.Host')) {
-                    $array['ws-opts']['headers'] = ['Host' => $host];
-                }
-                break;
-
-            case 'grpc':
-                $array['network'] = 'grpc';
-                $array['grpc-opts'] = [
-                    'grpc-service-name' => data_get(
-                        $protocol_settings,
-                        'network_settings.serviceName'
-                    ),
-                ];
                 break;
         }
 
