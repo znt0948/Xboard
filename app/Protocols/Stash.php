@@ -321,8 +321,8 @@ class Stash extends AbstractProtocol
         /* ---------- Network 统一规范化 ---------- */
         $network = data_get($protocol_settings, 'network');
 
-        // 面板脏数据兜底：bool / null 一律视为 tcp
-        if (!is_string($network)) {
+        // 面板脏数据兜底：不是字符串（如布尔值、null等）一律视为 'tcp'
+        if (!is_string($network) || !in_array($network, ['tcp', 'ws', 'grpc', 'http'], true)) {
             $network = 'tcp';
         }
 
@@ -349,17 +349,32 @@ class Stash extends AbstractProtocol
                 ];
                 break;
 
+            case 'http':
+                $array['network'] = 'http';
+                $httpOpts = array_filter([
+                    'headers' => data_get(
+                        $protocol_settings,
+                        'network_settings.header.request.headers'
+                    ),
+                    'path' => data_get(
+                        $protocol_settings,
+                        'network_settings.header.request.path',
+                        ['/']
+                    ),
+                ]);
+                if (!empty($httpOpts)) {
+                    $array['http-opts'] = $httpOpts;
+                }
+                break;
+
             case 'tcp':
             default:
                 // 默认 TCP
                 $array['network'] = 'tcp';
-
                 // 仅当 header.type 是字符串且为 http 时，才启用 HTTP 伪装
                 $headerType = data_get($protocol_settings, 'network_settings.header.type');
-
                 if (is_string($headerType) && $headerType === 'http') {
                     $array['network'] = 'http';
-
                     $httpOpts = array_filter([
                         'headers' => data_get(
                             $protocol_settings,
@@ -371,13 +386,15 @@ class Stash extends AbstractProtocol
                             ['/']
                         ),
                     ]);
-
                     if (!empty($httpOpts)) {
                         $array['http-opts'] = $httpOpts;
                     }
                 }
                 break;
         }
+
+        // 兜底，保证 network 字段始终为字符串且有效
+        $array['network'] = $array['network'] ?? 'tcp';
 
         return $array;
     }
