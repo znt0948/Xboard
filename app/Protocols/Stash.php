@@ -101,6 +101,15 @@ class Stash extends AbstractProtocol
                 array_push($proxies, $item['name']);
             }
             if ($item['type'] === Server::TYPE_VLESS) {
+                // Only allow valid network types; fallback to 'tcp' if not valid
+                $allowedNetworks = ['tcp', 'ws', 'grpc', 'http'];
+                $network = data_get($item['protocol_settings'] ?? [], 'network');
+                if (!is_string($network) || !in_array($network, $allowedNetworks, true)) {
+                    if (!isset($item['protocol_settings']) || !is_array($item['protocol_settings'])) {
+                        $item['protocol_settings'] = [];
+                    }
+                    $item['protocol_settings']['network'] = 'tcp';
+                }
                 array_push($proxy, $this->buildVless($item['password'], $item));
                 array_push($proxies, $item['name']);
             }
