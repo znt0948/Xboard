@@ -135,15 +135,12 @@ protected function buildOutbounds()
 
     // 2. 定义正则筛选规则
     $tagFilters = [
-        'vpn-out'       => '/VPN/i',                     // 包含 VPN
-        'vpn-us-out'    => '/^(?=.*VPN)(?=.*US).*$/i',
-        'download-out'  => '/BUD/i',                     // 包含 BUD
-        '智能优选'       => '/^(?!.*(VPN|BUD)).*$/i',    // 不包含 VPN/BUD
-        '流量节省'       => '/1\.0x/i',                  // 包含 1.0x
-        '手动选择'       => '/^(?!.*(VPN|BUD)).*$/i',    // 不包含 VPN/BUD
-        '电信优化'       => '/BGP|TEL/i',                // 包含 BGP 或 TEL
-        '联通优化'       => '/BGP|UNI/i',                // 包含 BGP 或 UNI
-        '移动优化'       => '/BGP|MOB/i',                // 包含 BGP 或 MOB
+        '香港'    => '/^(?=.*VPN)(?=.*HK|香港).*$/i',
+        '马来西亚'    => '/^(?=.*VPN)(?=.*MY|马来).*$/i',
+        '美国'    => '/^(?=.*VPN)(?=.*US|美国).*$/i',
+        '日本'    => '/^(?=.*VPN)(?=.*JP|日本).*$/i',
+        '下载加速器'  => '/BUD|低倍/i',                     // 包含 BUD
+        '默认节点'       => '/^(?!.*(VPN|BUD|低倍)).*$/i',    // 不包含 VPN/BUD
     ];
 
     // 3. 给 selector/urltest 类型 outbound 添加 proxy
