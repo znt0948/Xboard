@@ -1376,6 +1376,36 @@
     .tilt-content {
       transform: translateZ(20px);
     }
+
+    /* 6. Language Selector Styles */
+    .lang-selector-container {
+      margin-right: 15px;
+      display: flex;
+      align-items: center;
+    }
+
+    .lang-selector {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 14px;
+      color: var(--text-color);
+      cursor: pointer;
+      outline: none;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(5px);
+    }
+
+    :root.dark-theme .lang-selector {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .lang-selector:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: var(--primary-color);
+    }
   </style>
 </head>
 
@@ -1409,12 +1439,18 @@
       <h1 id="siteName">HzExtension</h1>
     </div>
     <nav class="nav-links">
-      <a href="#features">Features</a>
-      <a href="#download">Clients</a>
-      <a href="javascript:void(0)" onclick="navigateTo('shop')">Pricing</a>
-      <a href="javascript:void(0)" onclick="navigateTo('tickets')">Support</a>
+      <a href="#features" data-i18n="nav_features">Features</a>
+      <a href="#download" data-i18n="nav_clients">Clients</a>
+      <a href="javascript:void(0)" onclick="navigateTo('shop')" data-i18n="nav_pricing">Pricing</a>
+      <a href="javascript:void(0)" onclick="navigateTo('tickets')" data-i18n="nav_support">Support</a>
     </nav>
     <div class="nav-buttons">
+      <div class="lang-selector-container">
+        <select id="langSelector" class="lang-selector">
+          <option value="en">English</option>
+          <option value="zh">中文</option>
+        </select>
+      </div>
       <div class="theme-toggle" id="themeToggle">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -1430,8 +1466,10 @@
           <path d="M5.5 18.5l1.5 -1.5"></path>
         </svg>
       </div>
-      <a href="javascript:void(0)" onclick="navigateTo('login')" class="button secondary-button">Login</a>
-      <a href="javascript:void(0)" onclick="navigateTo('register')" class="button primary-button">Register</a>
+      <a href="javascript:void(0)" onclick="navigateTo('login')" class="button secondary-button"
+        data-i18n="login">Login</a>
+      <a href="javascript:void(0)" onclick="navigateTo('register')" class="button primary-button"
+        data-i18n="register">Register</a>
     </div>
     <button class="mobile-menu-button" id="mobileMenuButton">☰</button>
   </header>
@@ -1475,20 +1513,21 @@
     <div class="container" style="position: relative; z-index: 2;">
 
       <!-- 动态渐变标题 -->
-      <h1 class="hero-title mb-4">
+      <h1 class="hero-title mb-4" data-i18n="hero_title">
         HZ-EXTENSION
       </h1>
 
       <!-- 副标题 -->
-      <p class="hero-subtitle mb-4" style="font-size: 1rem; line-height: 1.8;">
+      <p class="hero-subtitle mb-4" style="font-size: 1rem; line-height: 1.8;" data-i18n="hero_subtitle">
         Building a High-Performance Global Interconnected Network<br>
         1200Mbps Dedicated Access Channel Built for Enterprises and Developers<br>
       </p>
 
       <!-- 按钮 -->
       <div class="hero-buttons">
-        <a href="javascript:void(0)" onclick="navigateTo('register')" class="button primary-button">Get Started</a>
-        <a href="#download" class="button secondary-button">Download Clients</a>
+        <a href="javascript:void(0)" onclick="navigateTo('register')" class="button primary-button"
+          data-i18n="get_started">Get Started</a>
+        <a href="#download" class="button secondary-button" data-i18n="download_clients">Download Clients</a>
       </div>
     </div>
 
@@ -1516,8 +1555,9 @@
   <!-- Statistics Section -->
   <section class="stats" id="stats">
     <div class="section-title">
-      <h3>Global Scale & Reliability</h3>
-      <p>Powering thousands of developers and businesses worldwide with unmatched speed and uptime.</p>
+      <h3 data-i18n="stats_title">Global Scale & Reliability</h3>
+      <p data-i18n="stats_subtitle">Powering thousands of developers and businesses worldwide with unmatched speed and
+        uptime.</p>
     </div>
 
     <!-- Map Background -->
@@ -1574,19 +1614,19 @@
     <div class="stats-container">
       <div class="stat-item">
         <h3 class="stat-number" data-target="10000">0</h3>
-        <p class="stat-label">Active Users</p>
+        <p class="stat-label" data-i18n="active_users">Active Users</p>
       </div>
       <div class="stat-item">
         <h3 class="stat-number" data-target="50">0</h3>
-        <p class="stat-label">Global Nodes</p>
+        <p class="stat-label" data-i18n="global_nodes">Global Nodes</p>
       </div>
       <div class="stat-item">
         <h3 class="stat-number" data-target="20">0</h3>
-        <p class="stat-label">Avg Latency (ms)</p>
+        <p class="stat-label" data-i18n="avg_latency">Avg Latency (ms)</p>
       </div>
       <div class="stat-item">
         <h3 class="stat-number" data-target="99">0</h3>
-        <p class="stat-label">Uptime (%)</p>
+        <p class="stat-label" data-i18n="uptime">Uptime (%)</p>
       </div>
     </div>
   </section>
@@ -1679,8 +1719,9 @@
 
   <section class="features" id="features">
     <div class="section-title">
-      <h3>Our Core Advantages</h3>
-      <p>Supporting your unlimited business potential with superior global network infrastructure</p>
+      <h3 data-i18n="features_title">Our Core Advantages</h3>
+      <p data-i18n="features_subtitle">Supporting your unlimited business potential with superior global network
+        infrastructure</p>
     </div>
     <div class="feature-grid">
       <div class="feature-card">
@@ -1693,8 +1734,8 @@
             <path d="M15 9m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
           </svg>
         </div>
-        <h4>Fast & Stable</h4>
-        <p>Direct connection to core backbone<br><strong>99.9%</strong> Uptime Guarantee</p>
+        <h4 data-i18n="feat_fast_title">Fast & Stable</h4>
+        <p data-i18n="feat_fast_desc">Direct connection to core backbone<br><strong>99.9%</strong> Uptime Guarantee</p>
       </div>
 
       <div class="feature-card">
@@ -1706,8 +1747,8 @@
             <path d="M8 11v-4a4 4 0 1 1 8 0v4"></path>
           </svg>
         </div>
-        <h4>Privacy & Security</h4>
-        <p>Self-developed DNS protection<br><strong>Zero</strong> Log Policy</p>
+        <h4 data-i18n="feat_privacy_title">Privacy & Security</h4>
+        <p data-i18n="feat_privacy_desc">Self-developed DNS protection<br><strong>Zero</strong> Log Policy</p>
       </div>
 
       <div class="feature-card">
@@ -1721,8 +1762,8 @@
             <path d="M12.5 3a17 17 0 0 1 0 18"></path>
           </svg>
         </div>
-        <h4>Global Connectivity</h4>
-        <p>Owned AS and core nodes<br><strong>50+</strong> Global Regions Covered</p>
+        <h4 data-i18n="feat_global_title">Global Connectivity</h4>
+        <p data-i18n="feat_global_desc">Owned AS and core nodes<br><strong>50+</strong> Global Regions Covered</p>
       </div>
 
       <div class="feature-card">
@@ -1734,8 +1775,8 @@
             <path d="M16 9h2"></path>
           </svg>
         </div>
-        <h4>Cross-Platform</h4>
-        <p>Supports mainstream operating systems<br>Seamless access anytime, anywhere</p>
+        <h4 data-i18n="feat_cross_title">Cross-Platform</h4>
+        <p data-i18n="feat_cross_desc">Supports mainstream operating systems<br>Seamless access anytime, anywhere</p>
       </div>
 
       <div class="feature-card">
@@ -1745,8 +1786,8 @@
             <path d="M13 3l0 7l6 0l-8 11l0 -7l-6 0l8 -11"></path>
           </svg>
         </div>
-        <h4>Plug & Play</h4>
-        <p>Smart strategy auto-routing<br>One-click connection, no configuration</p>
+        <h4 data-i18n="feat_plug_title">Plug & Play</h4>
+        <p data-i18n="feat_plug_desc">Smart strategy auto-routing<br>One-click connection, no configuration</p>
       </div>
 
       <div class="feature-card">
@@ -1758,8 +1799,8 @@
             </path>
           </svg>
         </div>
-        <h4>Personal Support</h4>
-        <p>24/7 service team<br>Quick response to every issue</p>
+        <h4 data-i18n="feat_support_title">Personal Support</h4>
+        <p data-i18n="feat_support_desc">24/7 service team<br>Quick response to every issue</p>
       </div>
     </div>
   </section>
@@ -1770,9 +1811,9 @@
     <!-- 生态协同 -->
     <div class="row align-items-center feature-row mb-6">
       <div class="col-md-5 order-1 order-md-2 mt-md-0 mt-5">
-        <span class="badge badge-pill badge-primary mb-4">Ecosystem Synergy</span>
-        <h2 class="mb-4">Unified Ecosystem, Smooth Experience</h2>
-        <p class="text-muted mb-5">
+        <span class="badge badge-pill badge-primary mb-4" data-i18n="eco_synergy_badge">Ecosystem Synergy</span>
+        <h2 class="mb-4" data-i18n="eco_synergy_title">Unified Ecosystem, Smooth Experience</h2>
+        <p class="text-muted mb-5" data-i18n="eco_synergy_desc">
           No matter what device you use, HzExtension intelligently identifies and syncs connection configurations in the
           cloud. Seamlessly sync data, preferences, and connection status across all terminals, truly achieving "set
           once, use everywhere".
@@ -1791,9 +1832,9 @@
           alt="Cloud intelligence optimization">
       </div>
       <div class="col-md-5 order-1 order-md-2 mt-md-0 mt-5">
-        <span class="badge badge-pill badge-primary mb-4">Cloud Intelligence</span>
-        <h2 class="mb-4">Understanding Your Connection Better</h2>
-        <p class="text-muted mb-5">
+        <span class="badge badge-pill badge-primary mb-4" data-i18n="cloud_intel_badge">Cloud Intelligence</span>
+        <h2 class="mb-4" data-i18n="cloud_intel_title">Understanding Your Connection Better</h2>
+        <p class="text-muted mb-5" data-i18n="cloud_intel_desc">
           HzExtension's intelligent routing and self-learning algorithms automatically optimize connection strategies
           based on real-time network conditions, providing the best network performance for shopping, work,
           entertainment, and other scenarios.
@@ -1804,9 +1845,9 @@
     <!-- 安全信任 -->
     <div class="row align-items-center feature-row mb-6">
       <div class="col-md-5 order-1 order-md-2 mt-md-0 mt-5">
-        <span class="badge badge-pill badge-primary mb-4">Security Trust</span>
-        <h2 class="mb-4">Securing Your Digital Trust at the Source</h2>
-        <p class="text-muted mb-5">
+        <span class="badge badge-pill badge-primary mb-4" data-i18n="security_trust_badge">Security Trust</span>
+        <h2 class="mb-4" data-i18n="security_trust_title">Securing Your Digital Trust at the Source</h2>
+        <p class="text-muted mb-5" data-i18n="security_trust_desc">
           We use end-to-end encryption and multi-factor authentication to provide the highest level of protection for
           your personal data and communication privacy. Wherever you are, HzExtension is your trusted network partner.
         </p>
@@ -3077,6 +3118,114 @@
     // 添加主题切换事件
     themeToggle.addEventListener('click', toggleTheme);
     mobileThemeToggle.addEventListener('click', toggleTheme);
+
+    // ================= 多语言支持 (Multi-language Support) =================
+    const translations = {
+      en: {
+        nav_features: "Features",
+        nav_clients: "Clients",
+        nav_pricing: "Pricing",
+        nav_support: "Support",
+        login: "Login",
+        register: "Register",
+        hero_title: "HZ-EXTENSION",
+        hero_subtitle: "Building a High-Performance Global Interconnected Network<br>1200Mbps Dedicated Access Channel Built for Enterprises and Developers",
+        get_started: "Get Started",
+        download_clients: "Download Clients",
+        stats_title: "Global Scale & Reliability",
+        stats_subtitle: "Powering thousands of developers and businesses worldwide with unmatched speed and uptime.",
+        active_users: "Active Users",
+        global_nodes: "Global Nodes",
+        avg_latency: "Avg Latency (ms)",
+        uptime: "Uptime (%)",
+        features_title: "Our Core Advantages",
+        features_subtitle: "Supporting your unlimited business potential with superior global network infrastructure",
+        feat_fast_title: "Fast & Stable",
+        feat_fast_desc: "Direct connection to core backbone<br><strong>99.9%</strong> Uptime Guarantee",
+        feat_privacy_title: "Privacy & Security",
+        feat_privacy_desc: "Self-developed DNS protection<br><strong>Zero</strong> Log Policy",
+        feat_global_title: "Global Connectivity",
+        feat_global_desc: "Owned AS and core nodes<br><strong>50+</strong> Global Regions Covered",
+        feat_cross_title: "Cross-Platform",
+        feat_cross_desc: "Supports mainstream operating systems<br>Seamless access anytime, anywhere",
+        feat_plug_title: "Plug & Play",
+        feat_plug_desc: "Smart strategy auto-routing<br>One-click connection, no configuration",
+        feat_support_title: "Personal Support",
+        feat_support_desc: "24/7 service team<br>Quick response to every issue",
+        eco_synergy_badge: "Ecosystem Synergy",
+        eco_synergy_title: "Unified Ecosystem, Smooth Experience",
+        eco_synergy_desc: "No matter what device you use, HzExtension intelligently identifies and syncs connection configurations in the cloud. Seamlessly sync data, preferences, and connection status across all terminals, truly achieving \"set once, use everywhere\".",
+        cloud_intel_badge: "Cloud Intelligence",
+        cloud_intel_title: "Understanding Your Connection Better",
+        cloud_intel_desc: "HzExtension's intelligent routing and self-learning algorithms automatically optimize connection strategies based on real-time network conditions, providing the best network performance for shopping, work, entertainment, and other scenarios.",
+        security_trust_badge: "Security Trust",
+        security_trust_title: "Securing Your Digital Trust at the Source",
+        security_trust_desc: "We use end-to-end encryption and multi-factor authentication to provide the highest level of protection for your personal data and communication privacy. Wherever you are, HzExtension is your trusted network partner."
+      },
+      zh: {
+        nav_features: "功能特性",
+        nav_clients: "客户端下载",
+        nav_pricing: "价格方案",
+        nav_support: "技术支持",
+        login: "登录",
+        register: "注册",
+        hero_title: "HZ-EXTENSION",
+        hero_subtitle: "打造高性能全球互联网络<br>为企业和开发者量身定制的 1200Mbps 专线访问通道",
+        get_started: "立即开始",
+        download_clients: "下载客户端",
+        stats_title: "全球规模与可靠性",
+        stats_subtitle: "为全球数千名开发者和企业提供卓越的速度和在线率保证。",
+        active_users: "活跃用户",
+        global_nodes: "全球节点",
+        avg_latency: "平均延迟 (ms)",
+        uptime: "在线率 (%)",
+        features_title: "核心优势",
+        features_subtitle: "卓越的全球网络基础设施，助力您的无限业务潜力",
+        feat_fast_title: "极速稳定",
+        feat_fast_desc: "直连核心骨干网络<br><strong>99.9%</strong> 在线率保证",
+        feat_privacy_title: "隐私安全",
+        feat_privacy_desc: "自主研发 DNS 保护<br><strong>零</strong> 日志策略",
+        feat_global_title: "全球互联",
+        feat_global_desc: "自备 AS 和核心节点<br>覆盖 <strong>50+</strong> 全球地区",
+        feat_cross_title: "跨平台支持",
+        feat_cross_desc: "支持主流操作系统<br>随时随地无缝访问",
+        feat_plug_title: "即插即用",
+        feat_plug_desc: "智能策略自动路由<br>一键连接，无需配置",
+        feat_support_title: "专属支持",
+        feat_support_desc: "24/7 服务团队<br>快速响应每个问题",
+        eco_synergy_badge: "生态协同",
+        eco_synergy_title: "统一生态，畅快体验",
+        eco_synergy_desc: "无论您使用何种设备，HzExtension 都能在云端智能识别并同步连接配置。在所有终端之间无缝同步数据、偏好和连接状态，真正实现“一次设置，随处使用”。",
+        cloud_intel_badge: "云端智能",
+        cloud_intel_title: "更懂您的连接需求",
+        cloud_intel_desc: "HzExtension 的智能路由和自学习算法可根据实时网络状况自动优化连接策略，为购物、工作、娱乐等各种场景提供最佳的网络性能。",
+        security_trust_badge: "安全信任",
+        security_trust_title: "从源头保障您的数字信任",
+        security_trust_desc: "我们采用端到端加密和多因素身份验证，为您的个人数据和通信隐私提供最高级别的保护。无论您身在何处，HzExtension 都是您值得信赖的网络伙伴。"
+      }
+    };
+
+    function updateLanguage(lang) {
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (translations[lang][key]) {
+          el.innerHTML = translations[lang][key];
+        }
+      });
+      localStorage.setItem('ez-language-preference', lang);
+      document.getElementById('langSelector').value = lang;
+    }
+
+    const langSelector = document.getElementById('langSelector');
+    langSelector.addEventListener('change', (e) => {
+      updateLanguage(e.target.value);
+    });
+
+    // 初始语言检测
+    const savedLang = localStorage.getItem('ez-language-preference');
+    const browserLang = (navigator.language || navigator.userLanguage).startsWith('zh') ? 'zh' : 'en';
+    const initialLang = savedLang || browserLang;
+    updateLanguage(initialLang);
 
     // 动态设置网站名称和版权信息
     document.addEventListener('DOMContentLoaded', function () {
