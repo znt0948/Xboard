@@ -1,136 +1,311 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HzExtension</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Service Terms - HzExtension</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-<!-- General CSS Files -->
-<link rel="stylesheet" href="./xy_css/bootstrap.min.css">
-<link rel="stylesheet" href="./xy_css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #355cc2;
+      --primary-color-light: #5c93ff;
+      --text-color: #333;
+      --text-light: #666;
+      --background-color: #fff;
+      --section-bg: #f5f5f7;
+      --glass-bg: rgba(255, 255, 255, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.4);
+    }
 
-<!-- Template CSS -->
-<link rel="stylesheet" href="./xy_css/style.css">
-<link rel="stylesheet" href="./xy_css/components.css">
+    :root.dark-theme {
+      --text-color: #f5f5f7;
+      --text-light: #a1a1a6;
+      --background-color: #1a1a1a;
+      --section-bg: #0f0f0f;
+      --glass-bg: rgba(30, 30, 30, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.05);
+    }
 
-<style>
-  ol { padding-left: 20px; }
-  ul { padding-left: 20px; }
-  h6:first-of-type { margin-top: 4px; }
-  h6 { margin-top: 24px; }
-  ol li { padding: 4px; }
-  ul li { padding: 0; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    }
 
-  /* 夜间模式 */
-  @media (prefers-color-scheme: dark) {
     body {
-      background-color: #121212;
-      color: #e0e0e0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--text-color);
+      background-color: var(--background-color);
+      line-height: 1.6;
+      overflow-x: hidden;
+      min-height: 100vh;
     }
-    .btn-primary {
-      background-color: #3a7bd5;
-      border-color: #3a7bd5;
+
+    /* Noise Texture */
+    .noise-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9000;
+      opacity: 0.05;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      background-size: 250px 250px;
+      mix-blend-mode: multiply;
     }
-  }
-</style>
+
+    :root.dark-theme .noise-overlay {
+      opacity: 0.08;
+      mix-blend-mode: screen;
+    }
+
+    /* Ambient Orbs */
+    .ambient-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.4;
+      animation: float 20s infinite ease-in-out alternate;
+    }
+
+    .orb-1 {
+      width: 400px;
+      height: 400px;
+      background: var(--primary-color);
+      top: -100px;
+      left: -100px;
+    }
+
+    .orb-2 {
+      width: 500px;
+      height: 500px;
+      background: var(--primary-color-light);
+      bottom: -150px;
+      right: -100px;
+      animation-delay: -5s;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translate(0, 0) scale(1);
+      }
+
+      100% {
+        transform: translate(50px, 50px) scale(1.1);
+      }
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 80px auto;
+      padding: 0 20px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .glass-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 50px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 40px;
+      text-align: center;
+      background: linear-gradient(135deg, var(--primary-color), #42a5f5);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    section {
+      margin-bottom: 35px;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h2::before {
+      content: '';
+      display: block;
+      width: 4px;
+      height: 20px;
+      background: var(--primary-color);
+      border-radius: 2px;
+    }
+
+    .content-pair {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .en {
+      font-size: 0.95rem;
+      color: var(--text-color);
+      font-weight: 400;
+    }
+
+    .zh {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      font-weight: 400;
+      border-left: 2px solid rgba(var(--primary-color), 0.1);
+      padding-left: 12px;
+    }
+
+    .warning-box {
+      background: rgba(255, 59, 48, 0.1);
+      border: 1px solid rgba(255, 59, 48, 0.2);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+
+    .warning-box h2 {
+      color: #ff3b30;
+    }
+
+    .warning-box h2::before {
+      background: #ff3b30;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 50px;
+      font-size: 0.85rem;
+      color: var(--text-light);
+    }
+
+    @media (max-width: 600px) {
+      .glass-card {
+        padding: 30px 20px;
+      }
+
+      h1 {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
 </head>
 
 <body>
-<div id="app">
-  <section class="section">
-    <div class="container mt-5">
-      <div class="row">
-        <div class="col-12 col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-8 offset-lg-2 col-xl-8 offset-xl-2">
-          <div class="login-brand">HzExtension</div>
+  <div class="noise-overlay"></div>
+  <div class="ambient-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+  </div>
 
-          <div class="card card-primary">
-            <div class="card-header">
-              <h4>HzExtension 服务条款</h4>
-            </div>
-            <div class="card-body">
-              <h6>服务描述</h6>
-              <p>
-                HzExtension 致力于提供全球范围内高性能且安全可靠的网络托管服务，旨在保障用户在互联网环境下的顺畅访问体验。该服务支持跨地域高速数据传输及多设备接入，然而不保证在任何情况下均实现零延迟或绝对可用性。
-              </p>
+  <div class="container">
+    <div class="glass-card">
+      <h1>Terms of Service / 服务条款</h1>
 
-              <h6>合法使用</h6>
-              <ul>
-                <li>
-                  <strong>禁止非法行为：</strong>用户不得利用 HzExtension 服务从事任何违法违规活动，包括但不限于侵权下载、恶意攻击、欺诈行为及发送垃圾邮件等。
-                </li>
-                <li>
-                  <strong>遵守法律法规：</strong>用户须严格遵守所在地及国际相关法律法规。部分国家或地区对网络托管服务存在限制或禁令，用户应确保合法合规使用。
-                </li>
-                <li>
-                  <strong>订阅及节点信息保护：</strong>用户不得泄露、分享或以任何形式公开与 HzExtension 服务相关的订阅链接、节点域名及节点 IP 等信息。
-                </li>
-              </ul>
-
-              <h6>用户责任</h6>
-              <p>
-                用户应确保其使用行为符合本服务条款及相关法律法规。任何违反规定的行为，HzExtension 有权暂停或终止服务且不予退款，用户需自行承担因此产生的所有风险和责任。
-              </p>
-
-              <h6>隐私与数据保护</h6>
-              <ul>
-                <li>
-                  <strong>数据保护：</strong>HzExtension 尊重并保护用户隐私，除法律要求或用户明确授权外，绝不分享、出售或公开用户个人数据。
-                </li>
-                <li>
-                  <strong>日志政策：</strong>为保障服务稳定，HzExtension 可能收集必要的连接日志及流量统计数据，仅用于服务优化及异常排查，并将在短期内自动删除。
-                </li>
-              </ul>
-
-              <h6>责任限制</h6>
-              <p>
-                使用 HzExtension 服务可能受限于网络速度、节点稳定性及运营商因素。HzExtension 对因服务中断、不可用或性能不达标所导致的任何直接或间接损失不承担责任。
-              </p>
-
-              <h6>修改与终止</h6>
-              <ul>
-                <li>
-                  HzExtension 保留随时修改服务条款的权利，用户有义务定期查阅并遵守最新条款。
-                </li>
-                <li>
-                  HzExtension 有权基于任何理由随时暂停或终止服务，且无需提前通知用户。
-                </li>
-              </ul>
-
-              <h6>条款接受</h6>
-              <p>
-                通过使用 HzExtension 网络托管服务，用户即表示已充分阅读、理解并同意遵守本服务条款。
-              </p>
-
-              <h6>其他</h6>
-              <ol>
-                <li>
-                  HzExtension 特此提醒用户关注本协议中关于免责及限制权利的条款，建议用户仔细阅读并自行承担相关风险。未成年人应在法定监护人陪同下阅读本协议。
-                </li>
-                <li>
-                  本协议的最终解释权归 HzExtension 所有，并保留对协议内容进行解释与修改的权利。
-                </li>
-                <li>
-                  本协议自 2021 年 9 月 5 日起正式生效。
-                </li>
-              </ol>
-            </div>
-          </div>
-
-          <div class="simple-footer mt-4">
-            Copyright © 2025 HzExtension
-            <div class="mt-2" id="copyright"></div>
-          </div>
-
+      <section>
+        <h2>Service Overview / 服务概览</h2>
+        <div class="content-pair">
+          <p class="en">HzExtension provides high-performance, secure network hosting services globally. We aim for
+            maximum uptime but do not guarantee zero latency or absolute availability under all conditions.</p>
+          <p class="zh">HzExtension 提供全球高性能且安全可靠的网络服务。我们致力于提升在线时间，但不保证在任何复杂环境下都能实现零延迟或绝对可用性。</p>
         </div>
-      </div>
+      </section>
+
+      <section class="warning-box">
+        <h2>Prohibited Regions / 禁止地区</h2>
+        <div class="content-pair">
+          <p class="en"><strong>USE IS STRICTLY PROHIBITED</strong> in regions where such services are restricted by
+            law, including but not limited to <strong>Mainland China, Iran, and Russia</strong>. Users are responsible
+            for ensuring compliance with local regulations.</p>
+          <p class="zh"><strong>严禁在法律禁止的地区或国家使用</strong>，包括但不限于<strong>中国大陆、伊朗、俄罗斯</strong>等。用户有责任确保其使用行为符合当地法律法规。</p>
+        </div>
+      </section>
+
+      <section>
+        <h2>Legal Use / 合法使用</h2>
+        <div class="content-pair">
+          <p class="en">Users must not engage in illegal activities, including copyright infringement, phishing, or
+            malicious attacks. Sharing subscription links or node IPs is strictly forbidden.</p>
+          <p class="zh">用户不得从事任何非法活动，包括侵权下载、欺诈或恶意攻击。严禁以任何形式公开或分享您的订阅链接、节点 IP 等私密信息。</p>
+        </div>
+      </section>
+
+      <section>
+        <h2>Privacy / 隐私政策</h2>
+        <div class="content-pair">
+          <p class="en">We respect your privacy. Data is used solely for service optimization and anomaly detection. We
+            do not sell or share personal information with third parties unless required by law.</p>
+          <p class="zh">我们尊重您的隐私。数据仅用于优化服务和异常排查。除法律要求外，我们绝不会向第三方出售或分享您的个人信息。</p>
+        </div>
+      </section>
+
+      <section>
+        <h2>Liability / 责任限制</h2>
+        <div class="content-pair">
+          <p class="en">HzExtension is not liable for loss or damages resulting from service interruptions or
+            performance variations caused by external network factors.</p>
+          <p class="zh">对于因外部网络因素导致的服务中断、性能波动所产生的任何损失，HzExtension 不承担法律责任。</p>
+        </div>
+      </section>
+
+      <footer>
+        <p>Copyright © 2026 HzExtension. All Rights Reserved.</p>
+        <p>Last modified: 2021-09-05</p>
+      </footer>
     </div>
-  </section>
-</div>
+  </div>
 
-<!-- Bootstrap JS and dependencies (ensure jQuery and Popper.js are loaded) -->
-<script src="./xy_css/jquery.min.js"></script>
-<script src="./xy_css/popper.min.js"></script>
-<script src="./xy_css/bootstrap.min.js"></script>
+  <script>
+    // Theme consistency script
+    (function () {
+      const THEME_STORAGE_KEY = 'ez-theme-preference';
+      const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
 
+      if (initialTheme === 'dark') {
+        document.documentElement.classList.add('dark-theme');
+      }
+
+      window.addEventListener('message', function (event) {
+        if (event.data && event.data.type === 'setTheme') {
+          if (event.data.theme === 'dark') {
+            document.documentElement.classList.add('dark-theme');
+          } else {
+            document.documentElement.classList.remove('dark-theme');
+          }
+        }
+      });
+    })();
+  </script>
 </body>
+
 </html>
