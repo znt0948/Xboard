@@ -14,18 +14,16 @@ use App\Services\TrafficResetService;
 use App\Models\TrafficResetLog;
 use App\Utils\Helper;
 use Illuminate\Support\Facades\Hash;
-use Carbon\Carbon;
 
 class UserService
 {
     /**
      * Get the remaining days until the next traffic reset for a user.
      * This method reuses the TrafficResetService logic for consistency.
-     * 
-     * dev: try to fix reset date
      */
     public function getResetDay(User $user): ?int
     {
+        // Use TrafficResetService to calculate the next reset time
         $trafficResetService = app(TrafficResetService::class);
         $nextResetTime = $trafficResetService->calculateNextResetTime($user);
 
@@ -33,18 +31,18 @@ class UserService
             return null;
         }
 
-        // 当前时间，使用系统时区或指定时区
-        $now = Carbon::now(config('app.timezone')); // 可改为 Carbon::now('Asia/Shanghai') 如果你想用北京时间
-        $resetTime = $nextResetTime->copy()->startOfDay(); // 保证重置时间从当天0点开始计算
+        // Calculate the remaining days from now to the next reset time
+        $now = time();
+        $resetTimestamp = $nextResetTime->timestamp;
 
-        if ($resetTime->lessThanOrEqualTo($now)) {
-            return 0;
+        if ($resetTimestamp <= $now) {
+            return 0; // Reset time has passed or is now
         }
 
-        // 剩余天数，考虑顺序差（allow negative = false）
-        $daysDifference = max(1, ceil($now->diffInHours($resetTime) / 24));
+        // Calculate the difference in days (rounded up)
+        $daysDifference = ceil(($resetTimestamp - $now) / 86400);
 
-        return $daysDifference;
+        return (int) $daysDifference;
     }
 
     public function isAvailable(User $user)
@@ -175,7 +173,7 @@ class UserService
         // 默认设置
         $user->remind_expire = admin_setting('default_remind_expire', 1);
         $user->remind_traffic = admin_setting('default_remind_traffic', 1);
-        $user->expired_at = 0;
+        $user->expired_at = null;
 
         // 可选字段
         $this->setOptionalFields($user, $data);
@@ -244,6 +242,7 @@ class UserService
         $user->group_id = $plan->group_id;
         $user->transfer_enable = $plan->transfer_enable * 1073741824;
         $user->speed_limit = $plan->speed_limit;
+        $user->device_limit = $plan->device_limit;
 
         if ($validityDays > 0) {
             $user = $this->extendSubscription($user, $validityDays);

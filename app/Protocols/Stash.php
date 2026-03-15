@@ -18,14 +18,14 @@ class Stash extends AbstractProtocol
         Server::TYPE_HYSTERIA,
         Server::TYPE_TROJAN,
         Server::TYPE_TUIC,
-        // Server::TYPE_ANYTLS,
+        Server::TYPE_ANYTLS,
         Server::TYPE_SOCKS,
         Server::TYPE_HTTP,
     ];
     protected $protocolRequirements = [
         'stash' => [
             'anytls' => [
-                'base_version' => '9.9.9'
+                'base_version' => '3.3.0' // AnyTLS 协议在3.3.0版本中添加
             ],
             'vless' => [
                 'protocol_settings.tls' => [
@@ -79,13 +79,7 @@ class Stash extends AbstractProtocol
         $user = $this->user;
         $appName = admin_setting('app_name', 'XBoard');
 
-        $template = admin_setting('subscribe_template_stash', File::exists(base_path(self::CUSTOM_TEMPLATE_FILE))
-            ? File::get(base_path(self::CUSTOM_TEMPLATE_FILE))
-            : (
-                File::exists(base_path(self::CUSTOM_CLASH_TEMPLATE_FILE))
-                ? File::get(base_path(self::CUSTOM_CLASH_TEMPLATE_FILE))
-                : File::get(base_path(self::DEFAULT_TEMPLATE_FILE))
-            ));
+        $template = subscribe_template('stash');
 
         $config = Yaml::parse($template);
         $proxy = [];
@@ -101,15 +95,6 @@ class Stash extends AbstractProtocol
                 array_push($proxies, $item['name']);
             }
             if ($item['type'] === Server::TYPE_VLESS) {
-                // Only allow valid network types; fallback to 'tcp' if not valid
-                $allowedNetworks = ['tcp', 'ws', 'grpc', 'http'];
-                $network = data_get($item['protocol_settings'] ?? [], 'network');
-                if (!is_string($network) || !in_array($network, $allowedNetworks, true)) {
-                    if (!isset($item['protocol_settings']) || !is_array($item['protocol_settings'])) {
-                        $item['protocol_settings'] = [];
-                    }
-                    $item['protocol_settings']['network'] = 'tcp';
-                }
                 array_push($proxy, $this->buildVless($item['password'], $item));
                 array_push($proxies, $item['name']);
             }
@@ -139,7 +124,7 @@ class Stash extends AbstractProtocol
             }
         }
 
-        $config['proxies'] = $proxy;
+        $config['proxies'] = array_merge($config['proxies'] ? $config['proxies'] : [], $proxy);
         foreach ($config['proxy-groups'] as $k => $v) {
             if (!is_array($config['proxy-groups'][$k]['proxies']))
                 $config['proxy-groups'][$k]['proxies'] = [];
@@ -260,10 +245,13 @@ class Stash extends AbstractProtocol
 
         switch (data_get($protocol_settings, 'network')) {
             case 'tcp':
-                $array['network'] = data_get($protocol_settings, 'network_settings.header.type', 'http');
-                $array['http-opts']['path'] = data_get($protocol_settings, 'network_settings.header.request.path', ['/']);
-                if ($host = data_get($protocol_settings, 'network_settings.header.request.headers.Host')) {
-                    $array['http-opts']['headers']['Host'] = $host;
+                $headerType = data_get($protocol_settings, 'network_settings.header.type', 'tcp');
+                $array['network'] = ($headerType === 'http') ? 'http' : 'tcp';
+                if ($headerType === 'http') {
+                    $array['http-opts']['path'] = data_get($protocol_settings, 'network_settings.header.request.path', ['/']);
+                    if ($host = data_get($protocol_settings, 'network_settings.header.request.headers.Host')) {
+                        $array['http-opts']['headers']['Host'] = $host;
+                    }
                 }
                 break;
             case 'ws':
@@ -286,115 +274,68 @@ class Stash extends AbstractProtocol
 
     public function buildVless($uuid, $server)
     {
-        $protocol_settings = $server['protocol_settings'] ?? [];
+        $protocol_settings = $server['protocol_settings'];
         $array = [];
-
         $array['name'] = $server['name'];
         $array['type'] = 'vless';
         $array['server'] = $server['host'];
         $array['port'] = $server['port'];
         $array['uuid'] = $uuid;
         $array['udp'] = true;
+
         $array['client-fingerprint'] = Helper::getRandFingerprint();
 
-        /* ---------- TLS / Reality ---------- */
-        $tlsMode = data_get($protocol_settings, 'tls');
-
-        if ($tlsMode === 1) {
-            $array['tls'] = true;
-            $array['skip-cert-verify'] = (bool) data_get($protocol_settings, 'tls_settings.allow_insecure', false);
-
-            if ($serverName = data_get($protocol_settings, 'tls_settings.server_name')) {
-                $array['servername'] = $serverName;
-            }
-        }
-
-        if ($tlsMode === 2) { // Reality
-            $array['tls'] = true;
-
-            if ($serverName = data_get($protocol_settings, 'reality_settings.server_name')) {
-                $array['servername'] = $serverName;
-                $array['sni'] = $serverName;
-            }
-
-            if ($flow = data_get($protocol_settings, 'flow')) {
-                $array['flow'] = $flow;
-            }
-
-            $array['reality-opts'] = array_filter([
-                'public-key' => data_get($protocol_settings, 'reality_settings.public_key'),
-                'short-id'   => data_get($protocol_settings, 'reality_settings.short_id'),
-            ]);
-        }
-
-        /* ---------- Network 统一规范化 ---------- */
-        $network = data_get($protocol_settings, 'network', 'tcp');
-        if (!is_string($network) || !in_array($network, ['tcp', 'ws', 'grpc', 'http'], true)) {
-            $network = 'tcp';
-        }
-
-        switch ($network) {
-            case 'ws':
-                $array['network'] = 'ws';
-                $array['ws-opts'] = [
-                    'path' => data_get($protocol_settings, 'network_settings.path', '/'),
-                ];
-
-                if ($host = data_get($protocol_settings, 'network_settings.headers.Host')) {
-                    $array['ws-opts']['headers'] = ['Host' => $host];
+        switch (data_get($protocol_settings, 'tls')) {
+            case 1:
+                $array['tls'] = true;
+                $array['skip-cert-verify'] = data_get($protocol_settings, 'tls_settings.allow_insecure');
+                if ($serverName = data_get($protocol_settings, 'tls_settings.server_name')) {
+                    $array['servername'] = $serverName;
                 }
                 break;
-
-            case 'grpc':
-                $array['network'] = 'grpc';
-                $array['grpc-opts'] = [
-                    'grpc-service-name' => data_get(
-                        $protocol_settings,
-                        'network_settings.serviceName'
-                    ),
+            case 2:
+                $array['tls'] = true;
+                if ($serverName = data_get($protocol_settings, 'reality_settings.server_name')) {
+                    $array['servername'] = $serverName;
+                    $array['sni'] = $serverName;
+                }
+                $array['flow'] = data_get($protocol_settings, 'flow');
+                $array['reality-opts'] = [
+                    'public-key' => data_get($protocol_settings, 'reality_settings.public_key'),
+                    'short-id' => data_get($protocol_settings, 'reality_settings.short_id')
                 ];
                 break;
+        }
 
-            case 'http':
-                $array['network'] = 'http';
-                $httpOpts = array_filter([
-                    'headers' => data_get(
-                        $protocol_settings,
-                        'network_settings.header.request.headers'
-                    ),
-                    'path' => data_get(
-                        $protocol_settings,
-                        'network_settings.header.request.path',
-                        ['/']
-                    ),
-                ]);
-                if (!empty($httpOpts)) {
-                    $array['http-opts'] = $httpOpts;
-                }
-                break;
-
+        switch (data_get($protocol_settings, 'network')) {
             case 'tcp':
-            default:
-                $array['network'] = 'tcp';
-                $headerType = data_get($protocol_settings, 'network_settings.header.type');
-                if (is_string($headerType) && $headerType === 'http') {
-                    $array['network'] = 'http';
-                    $httpOpts = array_filter([
-                        'headers' => data_get(
-                            $protocol_settings,
-                            'network_settings.header.request.headers'
-                        ),
-                        'path' => data_get(
-                            $protocol_settings,
-                            'network_settings.header.request.path',
-                            ['/']
-                        ),
-                    ]);
-                    if (!empty($httpOpts)) {
+                $headerType = data_get($protocol_settings, 'network_settings.header.type', 'tcp');
+                $array['network'] = ($headerType === 'http') ? 'http' : 'tcp';
+                if ($headerType === 'http') {
+                    if ($httpOpts = array_filter([
+                        'headers' => data_get($protocol_settings, 'network_settings.header.request.headers'),
+                        'path' => data_get($protocol_settings, 'network_settings.header.request.path', ['/'])
+                    ])) {
                         $array['http-opts'] = $httpOpts;
                     }
                 }
                 break;
+            case 'ws':
+                $array['network'] = 'ws';
+                $array['ws-opts']['path'] = data_get($protocol_settings, 'network_settings.path');
+                if ($host = data_get($protocol_settings, 'network_settings.headers.Host')) {
+                    $array['ws-opts']['headers'] = ['Host' => $host];
+                }
+                break;
+            case 'grpc':
+                $array['network'] = 'grpc';
+                $array['grpc-opts']['grpc-service-name'] = data_get($protocol_settings, 'network_settings.serviceName');
+                break;
+                // case 'h2':
+                //     $array['network'] = 'h2';
+                //     $array['h2-opts']['host'] = data_get($protocol_settings, 'network_settings.host');
+                //     $array['h2-opts']['path'] = data_get($protocol_settings, 'network_settings.path');
+                //     break;
         }
 
         return $array;
@@ -412,8 +353,11 @@ class Stash extends AbstractProtocol
         $array['udp'] = true;
         switch (data_get($protocol_settings, 'network')) {
             case 'tcp':
-                $array['network'] = data_get($protocol_settings, 'network_settings.header.type');
-                $array['http-opts']['path'] = data_get($protocol_settings, 'network_settings.header.request.path', ['/']);
+                $headerType = data_get($protocol_settings, 'network_settings.header.type', 'tcp');
+                $array['network'] = ($headerType === 'http') ? 'http' : 'tcp';
+                if ($headerType === 'http') {
+                    $array['http-opts']['path'] = data_get($protocol_settings, 'network_settings.header.request.path', ['/']);
+                }
                 break;
             case 'ws':
                 $array['network'] = 'ws';
